@@ -1,0 +1,12 @@
+G:\CodeProject\NodePro\NodePro.Core\bin\Debug\net8.0-windows\NodePro.Core.deps.json
+G:\CodeProject\NodePro\NodePro.Core\bin\Debug\net8.0-windows\NodePro.Core.dll
+G:\CodeProject\NodePro\NodePro.Core\bin\Debug\net8.0-windows\NodePro.Core.pdb
+G:\CodeProject\NodePro\NodePro.Core\obj\Debug\net8.0-windows\NodePro.Core.GeneratedMSBuildEditorConfig.editorconfig
+G:\CodeProject\NodePro\NodePro.Core\obj\Debug\net8.0-windows\NodePro.Core.AssemblyInfoInputs.cache
+G:\CodeProject\NodePro\NodePro.Core\obj\Debug\net8.0-windows\NodePro.Core.AssemblyInfo.cs
+G:\CodeProject\NodePro\NodePro.Core\obj\Debug\net8.0-windows\NodePro.Core.csproj.CoreCompileInputs.cache
+G:\CodeProject\NodePro\NodePro.Core\obj\Debug\net8.0-windows\NodePro.Core.dll
+G:\CodeProject\NodePro\NodePro.Core\obj\Debug\net8.0-windows\refint\NodePro.Core.dll
+G:\CodeProject\NodePro\NodePro.Core\obj\Debug\net8.0-windows\NodePro.Core.pdb
+G:\CodeProject\NodePro\NodePro.Core\obj\Debug\net8.0-windows\ref\NodePro.Core.dll
+G:\CodeProject\NodePro\NodePro.Core\obj\Debug\net8.0-windows\NodePro.Core.csproj.AssemblyReference.cache

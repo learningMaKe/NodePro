@@ -1,0 +1,55 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=netstandard">
+
+
+
+    <sys:Double x:Key="ThicknessValue">5</sys:Double>
+
+
+    <!--  Thickness  -->
+    <Thickness
+        x:Key="RightAwayThickness"
+        Bottom="0"
+        Left="0"
+        Right="{StaticResource ThicknessValue}"
+        Top="0" />
+
+    <Thickness
+        x:Key="LeftAwayThickness"
+        Bottom="0"
+        Left="{StaticResource ThicknessValue}"
+        Right="0"
+        Top="0" />
+
+    <Thickness
+        x:Key="TopAwayThickness"
+        Bottom="0"
+        Left="0"
+        Right="0"
+        Top="{StaticResource ThicknessValue}" />
+
+    <Thickness
+        x:Key="BottomAwayThickness"
+        Bottom="{StaticResource ThicknessValue}"
+        Left="0"
+        Right="0"
+        Top="0" />
+
+    <Thickness
+        x:Key="AllAwayThickness"
+        Bottom="{StaticResource ThicknessValue}"
+        Left="{StaticResource ThicknessValue}"
+        Right="{StaticResource ThicknessValue}"
+        Top="{StaticResource ThicknessValue}" />
+
+    <!--  CornetRadius  -->
+
+    <CornerRadius x:Key="DefaultCornerRadius">5</CornerRadius>
+    <CornerRadius x:Key="TopRoundRadius">5,5,0,0</CornerRadius>
+    <CornerRadius x:Key="BottomRoundRadius">0,0,5,5</CornerRadius>
+    <CornerRadius x:Key="LeftRoundRadius">5,0,0,5</CornerRadius>
+    <CornerRadius x:Key="RightRoundRadius">0,5,5,0</CornerRadius>
+
+</ResourceDictionary>

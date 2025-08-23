@@ -6,6 +6,18 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Prism.DryIoc" Version="9.0.537" />
+    <PackageReference Include="WPF-UI" Version="4.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Modules\NodePro.Modules.Display\NodePro.Modules.Display.csproj" />
+    <ProjectReference Include="..\NodePro.Core\NodePro.Core.csproj" />
+    <ProjectReference Include="..\NodePro.UI\NodePro.UI.csproj" />
+  </ItemGroup>
 
 </Project>

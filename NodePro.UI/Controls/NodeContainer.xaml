@@ -1,0 +1,26 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:core="clr-namespace:NodePro.Core.Node;assembly=NodePro.Core">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/NodePro.UI;component/Constants.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+
+    <ControlTemplate x:Key="DefaultNodeContainerTemplate" TargetType="{x:Type core:NodeContainer}">
+        <Grid HorizontalAlignment="{TemplateBinding HorizontalAlignment}" VerticalAlignment="{TemplateBinding VerticalAlignment}">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <!--  Header  -->
+            <Border Background="{TemplateBinding Background}" CornerRadius="{DynamicResource TopRoundRadius}" />
+            <Border Grid.Row="1" CornerRadius="{DynamicResource BottomRoundRadius}" />
+
+        </Grid>
+
+    </ControlTemplate>
+    <Style x:Key="DefaultNodeContainer" TargetType="{x:Type core:NodeContainer}">
+        <Setter Property="Template" Value="{StaticResource DefaultNodeContainerTemplate}" />
+    </Style>
+</ResourceDictionary>
