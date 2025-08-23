@@ -37,12 +37,7 @@
         Right="0"
         Top="0" />
 
-    <Thickness
-        x:Key="AllAwayThickness"
-        Bottom="{StaticResource ThicknessValue}"
-        Left="{StaticResource ThicknessValue}"
-        Right="{StaticResource ThicknessValue}"
-        Top="{StaticResource ThicknessValue}" />
+    <Thickness x:Key="AllAwayThickness">3</Thickness>
 
     <!--  CornetRadius  -->
 

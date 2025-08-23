@@ -14,13 +14,21 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
             <!--  Header  -->
-            <Border Background="{TemplateBinding Background}" CornerRadius="{DynamicResource TopRoundRadius}" />
+            <Border Background="{TemplateBinding Background}" CornerRadius="{DynamicResource TopRoundRadius}">
+                <ContentPresenter
+                    Margin="{TemplateBinding Padding}"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Content="{TemplateBinding Header}"
+                    ContentTemplate="{TemplateBinding HeaderTemplate}" />
+            </Border>
             <Border Grid.Row="1" CornerRadius="{DynamicResource BottomRoundRadius}" />
 
         </Grid>
 
     </ControlTemplate>
     <Style x:Key="DefaultNodeContainer" TargetType="{x:Type core:NodeContainer}">
+        <Setter Property="Padding" Value="{StaticResource AllAwayThickness}" />
         <Setter Property="Template" Value="{StaticResource DefaultNodeContainerTemplate}" />
     </Style>
 </ResourceDictionary>
