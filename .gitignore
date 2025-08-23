@@ -2,3 +2,8 @@
 "obj\" 
 /.vs
 /NodePro/obj
+/NodePro/bin/Debug/net8.0-windows/NodePro.dll
+/NodePro/bin/Debug/net8.0-windows/NodePro.exe
+/NodePro/bin/Debug/net8.0-windows/NodePro.Modules.Display.dll
+/NodePro/bin/Debug/net8.0-windows/NodePro.Modules.Display.pdb
+/NodePro/bin/Debug/net8.0-windows/NodePro.pdb
