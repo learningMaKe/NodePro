@@ -3,9 +3,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:core="clr-namespace:NodePro.Core.Node;assembly=NodePro.Core">
     <ResourceDictionary.MergedDictionaries>
+
         <ResourceDictionary Source="/NodePro.UI;component/Constants.xaml" />
         <ResourceDictionary Source="/NodePro.UI;component/Controls/NodeContainer.xaml" />
+        <ResourceDictionary Source="/NodePro.UI;component/Controls/NodeConnector.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <Style BasedOn="{StaticResource DefaultNodeContainer}" TargetType="{x:Type core:NodeContainer}" />
+    <Style BasedOn="{StaticResource DefaultNodeConnector}" TargetType="{x:Type core:NodeConnector}" />
 </ResourceDictionary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,5 +25,15 @@ namespace NodePro.Modules.Display.Views
         {
             InitializeComponent();
         }
+
+        private void OnClick(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void OnMouseDown(object sender, MouseButtonEventArgs e)
+        {
+        }
+
     }
 }

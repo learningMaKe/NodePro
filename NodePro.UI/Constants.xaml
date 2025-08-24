@@ -5,7 +5,7 @@
 
 
 
-    <sys:Double x:Key="ThicknessValue">5</sys:Double>
+    <sys:Double x:Key="ThicknessValue">8</sys:Double>
 
 
     <!--  Thickness  -->
@@ -37,7 +37,7 @@
         Right="0"
         Top="0" />
 
-    <Thickness x:Key="AllAwayThickness">3</Thickness>
+    <Thickness x:Key="AllAwayThickness">5</Thickness>
 
     <!--  CornetRadius  -->
 

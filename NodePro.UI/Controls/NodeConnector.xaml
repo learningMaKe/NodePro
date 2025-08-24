@@ -1,0 +1,53 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:convert="clr-namespace:NodePro.Core.Converters;assembly=NodePro.Core"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:node="clr-namespace:NodePro.Core.Node;assembly=NodePro.Core"
+    xmlns:sys="clr-namespace:System;assembly=netstandard">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/NodePro.UI;component/Constants.xaml" />
+        <ResourceDictionary Source="/NodePro.UI;component/Brushes.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <convert:DoubleToRadiusConverter x:Key="DoubleToRadiusConverter" />
+
+    <sys:Double x:Key="OuterConnectorSize">12</sys:Double>
+
+    <sys:Double x:Key="InnerConnectorSize">10</sys:Double>
+
+    <ControlTemplate x:Key="DefaultNodeConnectorTemplate" TargetType="{x:Type node:NodeConnector}">
+        <Border
+            Width="{TemplateBinding ConnectorSize}"
+            Height="{TemplateBinding ConnectorSize}"
+            HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+            VerticalAlignment="{TemplateBinding VerticalAlignment}"
+            node:NodeHelper.Connector="{Binding RelativeSource={RelativeSource AncestorType=node:NodeConnector}}"
+            AllowDrop="{TemplateBinding AllowDrop}"
+            Background="{TemplateBinding Background}"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            BorderThickness="{TemplateBinding BorderThickness}"
+            CornerRadius="{Binding RelativeSource={RelativeSource AncestorType=node:NodeConnector}, Path=ConnectorSize, Converter={StaticResource DoubleToRadiusConverter}}">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Drop">
+                    <i:InvokeCommandAction Command="{x:Static node:NodeConnector.DropCommand}" PassEventArgsToCommand="True" />
+                </i:EventTrigger>
+                <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
+                    <i:InvokeCommandAction Command="{x:Static node:NodeConnector.DropStartCommand}" PassEventArgsToCommand="True" />
+                </i:EventTrigger>
+                <i:EventTrigger EventName="PreviewMouseMove">
+                    <i:InvokeCommandAction Command="{x:Static node:NodeConnector.DropMoveCommand}" PassEventArgsToCommand="True" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </Border>
+    </ControlTemplate>
+
+    <Style x:Key="DefaultNodeConnector" TargetType="{x:Type node:NodeConnector}">
+        <Setter Property="AllowDrop" Value="True" />
+        <Setter Property="BorderBrush" Value="Black" />
+        <Setter Property="BorderThickness" Value="2" />
+        <Setter Property="ConnectorSize" Value="{StaticResource OuterConnectorSize}" />
+        <Setter Property="Background" Value="{DynamicResource NodeConnectorPrimaryBrush}" />
+        <Setter Property="Template" Value="{StaticResource DefaultNodeConnectorTemplate}" />
+    </Style>
+</ResourceDictionary>
