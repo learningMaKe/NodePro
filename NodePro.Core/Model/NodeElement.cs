@@ -9,7 +9,18 @@ namespace NodePro.Core.Model
 {
     public class NodeElementGroup : ObservableCollection<NodeElement>
     {
+        public NodeElementGroup(params NodeElement[] elements)
+        {
+            AddRange(elements);
+        }
 
+        public void AddRange(IEnumerable<NodeElement> elements)
+        {
+            foreach(var element in elements) 
+            {
+                this.Add(element); 
+            }
+        }
     }
 
     public class NodeElement:BindableBase
@@ -23,7 +34,7 @@ namespace NodePro.Core.Model
             set { SetProperty(ref _content, value); }
         }
 
-        private string _template = string.Empty;
+        private string _template = TemplateKey.DefaultNodeTemplate;
 
         public string Template
         {

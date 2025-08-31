@@ -26,5 +26,22 @@ namespace NodePro.Core.Node
             DependencyProperty.RegisterAttached("Connector", typeof(NodeConnector), typeof(NodeHelper), new PropertyMetadata(null));
 
 
+
+        public static NodeContainer GetContainer(DependencyObject obj)
+        {
+            return (NodeContainer)obj.GetValue(ContainerProperty);
+        }
+
+        public static void SetContainer(DependencyObject obj, NodeContainer value)
+        {
+            obj.SetValue(ContainerProperty, value);
+        }
+
+        // Using a DependencyProperty as the backing store for Container.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ContainerProperty =
+            DependencyProperty.RegisterAttached("Container", typeof(NodeContainer), typeof(NodeHelper), new PropertyMetadata(null));
+
+
+
     }
 }

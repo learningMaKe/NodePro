@@ -51,8 +51,6 @@ namespace NodePro.Core.Node
         public static readonly DependencyProperty ConnectorTypeProperty =
             DependencyProperty.Register("ConnectorType", typeof(ConnectorType), typeof(NodeConnector), new PropertyMetadata(ConnectorType.Input));
 
-
-
         public double ConnectorSize
         {
             get { return (double)GetValue(ConnectorSizeProperty); }
@@ -62,6 +60,19 @@ namespace NodePro.Core.Node
         // Using a DependencyProperty as the backing store for ConnectorSize.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ConnectorSizeProperty =
             DependencyProperty.Register("ConnectorSize", typeof(double), typeof(NodeConnector), new PropertyMetadata(15.0));
+
+
+
+        public NodeContainer NodeParent
+        {
+            get { return (NodeContainer)GetValue(NodeParentProperty); }
+            set { SetValue(NodeParentProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for NodeParent.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty NodeParentProperty =
+            DependencyProperty.Register("NodeParent", typeof(NodeContainer), typeof(NodeConnector), new PropertyMetadata(null));
+
 
 
         #endregion
@@ -119,13 +130,49 @@ namespace NodePro.Core.Node
 
         private static void ExecuteDropCommand(DragEventArgs args)
         {
+            // 验证源对象
             if (args.Source is not DependencyObject obj) return;
-            var source = args.Data.GetData(typeof(NodeConnector)) as NodeConnector;
-            if (source == null) return;
+
+            // 获取拖拽的源连接器
+            if (args.Data.GetData(typeof(NodeConnector)) is not NodeConnector source) return;
+
+            // 获取目标连接器
             var target = NodeHelper.GetConnector(obj);
             if (target == null) return;
-            target.OnConnect(source, target);
 
+            // 1. 检查源和目标是否属于同一个父节点（防止节点自连）
+            if (source.NodeParent == target.NodeParent)
+            {
+                System.Diagnostics.Debug.WriteLine("无效连接：不能在同一节点的连接器之间建立连接");
+                return;
+            }
+
+            // 2. 声明实际用于连接的源和目标
+            NodeConnector actualSource;
+            NodeConnector actualTarget;
+
+            // 3. 判断连接方向并处理
+            if (source.ConnectorType == ConnectorType.Output && target.ConnectorType == ConnectorType.Input)
+            {
+                // 情况1：正常方向（输出→输入），直接使用原始对象
+                actualSource = source;
+                actualTarget = target;
+            }
+            else if (source.ConnectorType == ConnectorType.Input && target.ConnectorType == ConnectorType.Output)
+            {
+                // 情况2：反向连接（输入→输出），自动反转方向
+                actualSource = target;  // 输出节点作为实际源
+                actualTarget = source;  // 输入节点作为实际目标
+            }
+            else
+            {
+                // 情况3：无效连接（输入→输入 或 输出→输出）
+                System.Diagnostics.Debug.WriteLine("无效的连接组合：只能在输出和输入之间建立连接");
+                return;
+            }
+
+            // 4. 执行连接操作（确保始终是输出→输入，且不同节点）
+            actualTarget.OnConnect(actualSource, actualTarget);
         }
 
         private static void ExecuteDropStartCommand(MouseButtonEventArgs args)

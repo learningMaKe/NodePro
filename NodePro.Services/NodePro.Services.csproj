@@ -7,4 +7,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NodePro.Core\NodePro.Core.csproj" />
+    <ProjectReference Include="..\NodePro.Services.Interfaces\NodePro.Services.Interfaces.csproj" />
+    <ProjectReference Include="..\NodePro.UI\NodePro.UI.csproj" />
+  </ItemGroup>
+
 </Project>

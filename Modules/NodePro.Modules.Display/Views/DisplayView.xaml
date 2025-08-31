@@ -14,31 +14,36 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <Grid>
+        <i:Interaction.Triggers>
+            <i:EventTrigger EventName="NodeConnect">
+                <i:InvokeCommandAction Command="{Binding ConnectCommand}" PassEventArgsToCommand="True" />
+            </i:EventTrigger>
+        </i:Interaction.Triggers>
+
         <Button
             HorizontalAlignment="Center"
             VerticalAlignment="Top"
             Click="OnClick"
             Content="点击我"
             PreviewMouseLeftButtonDown="OnMouseDown" />
-        <node:NodeContainer
-            HorizontalAlignment="Left"
-            VerticalAlignment="Center"
-            Header="你好"
-            IsSelected="True">
-            <model:NodeElement Content="我要测试" />
-            <model:NodeElement Content="测试啊，测试" />
-        </node:NodeContainer>
-        <node:NodeContainer
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Header="我也好">
+        <Canvas x:Name="NodeCanvas">
             <i:Interaction.Triggers>
-                <i:EventTrigger EventName="Connect">
-                    <i:InvokeCommandAction Command="{Binding ConnectCommand}" PassEventArgsToCommand="True" />
+                <i:EventTrigger EventName="Loaded">
+                    <i:InvokeCommandAction Command="{Binding CanvasLoadedCommand}" CommandParameter="{Binding ElementName=NodeCanvas}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
-            <model:NodeElement Content="我也要测试" />
-        </node:NodeContainer>
+            <node:NodeContainer Header="你好啊">
+                <model:NodeElement Content="测试呀" />
+                <model:NodeElement Content="测测你的" />
+            </node:NodeContainer>
+            <node:NodeContainer
+                Header="我也要测试"
+                HeaderBackground="Orange"
+                Position="300,200">
+                <model:NodeElement Content="测试呀" />
+                <model:NodeElement Content="测测你的" />
+            </node:NodeContainer>
+        </Canvas>
 
     </Grid>
 </UserControl>

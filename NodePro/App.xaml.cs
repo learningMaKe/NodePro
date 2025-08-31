@@ -1,4 +1,6 @@
-﻿using NodePro.ViewModels;
+﻿using NodePro.Services;
+using NodePro.Services.Interfaces;
+using NodePro.ViewModels;
 using NodePro.Views;
 using System.Configuration;
 using System.Data;
@@ -20,6 +22,7 @@ namespace NodePro
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterSingleton<IContentDialogService, ContentDialogService>();
+            containerRegistry.RegisterSingleton<INodeService, NodeService>();
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
@@ -27,6 +30,7 @@ namespace NodePro
             base.ConfigureModuleCatalog(moduleCatalog);
             moduleCatalog.AddModule<NodePro.Modules.Display.DisplayModule>();
         }
+
     }
 
 }

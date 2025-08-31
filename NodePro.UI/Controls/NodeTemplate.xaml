@@ -1,0 +1,18 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:model="clr-namespace:NodePro.Core.Model;assembly=NodePro.Core"
+    xmlns:node="clr-namespace:NodePro.Core;assembly=NodePro.Core">
+
+    <DataTemplate x:Key="DefaultNodeTemplate" DataType="{x:Type model:NodeElement}">
+        <TextBlock Text="{Binding Content}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="IntValue" DataType="{x:Type model:NodeElement}">
+        <TextBlock Foreground="Red" Text="{Binding Content}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="StringValue" DataType="{x:Type model:NodeElement}">
+        <TextBlock Foreground="Green" Text="{Binding Content}" />
+    </DataTemplate>
+</ResourceDictionary>

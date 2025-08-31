@@ -17,6 +17,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Modules\NodePro.Modules.Display\NodePro.Modules.Display.csproj" />
     <ProjectReference Include="..\NodePro.Core\NodePro.Core.csproj" />
+    <ProjectReference Include="..\NodePro.Services.Interfaces\NodePro.Services.Interfaces.csproj" />
+    <ProjectReference Include="..\NodePro.Services\NodePro.Services.csproj" />
     <ProjectReference Include="..\NodePro.UI\NodePro.UI.csproj" />
   </ItemGroup>
 

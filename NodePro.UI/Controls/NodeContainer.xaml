@@ -13,6 +13,11 @@
 
     <convert:Divide2Converter x:Key="Divide2Converter" />
     <convert:InverseDivide2Converter x:Key="InverseDivide2Converter" />
+    <core:NodeTemplateSelector x:Key="NodeTemplate" />
+
+    <DataTemplate x:Key="DefaultNodeElementTemplateStyle" DataType="{x:Type model:NodeElement}">
+        <TextBox />
+    </DataTemplate>
 
     <DataTemplate x:Key="DefaultNodeElementHolder" DataType="{x:Type model:NodeElementGroup}">
         <ItemsControl Background="Transparent" ItemsSource="{Binding}">
@@ -30,21 +35,37 @@
                             Margin="{StaticResource RightAwayThickness}"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
-                            ConnectorType="Input">
+                            ConnectorType="Input"
+                            NodeParent="{Binding RelativeSource={RelativeSource AncestorType=core:NodeContainer}}">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Connect">
+                                    <i:InvokeCommandAction Command="{x:Static core:NodeContainer.InputConnectCommand}" PassEventArgsToCommand="True" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
                             <core:NodeConnector.RenderTransform>
                                 <TranslateTransform X="{Binding ElementName=LeftConnector, Path=ActualWidth, Converter={StaticResource InverseDivide2Converter}}" />
                             </core:NodeConnector.RenderTransform>
                         </core:NodeConnector>
 
-                        <ContentControl Grid.Column="1" Content="{Binding Content}" />
-
+                        <ContentControl
+                            Grid.Column="1"
+                            Content="{Binding}"
+                            ContentTemplateSelector="{Binding RelativeSource={RelativeSource AncestorType=core:NodeContainer}, Path=ElementSelector}"
+                            DataContext="{Binding}" />
                         <core:NodeConnector
                             x:Name="RightConnector"
                             Grid.Column="2"
                             Margin="{StaticResource LeftAwayThickness}"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center"
-                            ConnectorType="Output">
+                            ConnectorType="Output"
+                            NodeParent="{Binding RelativeSource={RelativeSource AncestorType=core:NodeContainer}}">
+
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Connect">
+                                    <i:InvokeCommandAction Command="{x:Static core:NodeContainer.OutputConnectCommand}" PassEventArgsToCommand="True" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
                             <core:NodeConnector.RenderTransform>
                                 <TranslateTransform X="{Binding ElementName=RightConnector, Path=ActualWidth, Converter={StaticResource Divide2Converter}}" />
                             </core:NodeConnector.RenderTransform>
@@ -66,7 +87,7 @@
             Focusable="{TemplateBinding Focusable}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
-                    <i:InvokeCommandAction Command="{x:Static core:NodeContainer.HeaderClickedCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=core:NodeContainer}}" />
+                    <i:InvokeCommandAction Command="{Binding RelativeSource={RelativeSource AncestorType=core:NodeContainer}, Path=HeaderClickedCommand}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
             <Border.Effect>
@@ -78,15 +99,40 @@
                     <RowDefinition />
                 </Grid.RowDefinitions>
                 <!--  Header  -->
+
                 <Border Background="{TemplateBinding HeaderBackground}" CornerRadius="{DynamicResource TopRoundRadius}">
 
-                    <ContentPresenter
-                        Margin="{TemplateBinding Padding}"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        Content="{TemplateBinding Header}"
-                        ContentTemplate="{TemplateBinding HeaderTemplate}"
-                        TextElement.Foreground="{TemplateBinding Foreground}" />
+                    <Grid>
+
+                        <Thumb
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            core:NodeHelper.Container="{Binding RelativeSource={RelativeSource AncestorType=core:NodeContainer}}"
+                            Background="Transparent"
+                            Foreground="{TemplateBinding Foreground}"
+                            Tag="{TemplateBinding Header}">
+
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="DragDelta">
+                                    <i:InvokeCommandAction Command="{Binding RelativeSource={RelativeSource AncestorType=core:NodeContainer}, Path=MoveCommand}" PassEventArgsToCommand="True" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                            <Thumb.Template>
+                                <ControlTemplate>
+                                    <Grid>
+                                        <Rectangle Fill="{TemplateBinding Background}" />
+                                        <ContentPresenter
+                                            Margin="{TemplateBinding Padding}"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Stretch"
+                                            Content="{TemplateBinding Tag}"
+                                            TextElement.Foreground="{TemplateBinding Foreground}" />
+                                    </Grid>
+                                </ControlTemplate>
+                            </Thumb.Template>
+                        </Thumb>
+                    </Grid>
                 </Border>
                 <Border
                     Grid.Row="1"
@@ -104,10 +150,12 @@
                 </Border>
             </Grid>
         </Border>
+
         <ControlTemplate.Triggers>
             <Trigger Property="IsSelected" Value="True">
                 <Setter TargetName="MainContainer" Property="Effect" Value="{x:Null}" />
                 <Setter TargetName="MainContainer" Property="BorderBrush" Value="White" />
+                <Setter Property="ZIndex" Value="999" />
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
@@ -118,6 +166,8 @@
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="2" />
         <Setter Property="Focusable" Value="True" />
+        <Setter Property="Canvas.Left" Value="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Position.X}" />
+        <Setter Property="Canvas.Top" Value="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Position.Y}" />
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="Background" Value="{DynamicResource NodeBackgroundBrush}" />
         <Setter Property="HeaderBackground" Value="{DynamicResource NodePrimaryBrush}" />

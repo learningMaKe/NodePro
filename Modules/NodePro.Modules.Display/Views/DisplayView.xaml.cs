@@ -21,6 +21,10 @@ namespace NodePro.Modules.Display.Views
     /// </summary>
     public partial class DisplayView : UserControl
     {
+
+        #region Commands
+
+        #endregion
         public DisplayView()
         {
             InitializeComponent();
@@ -33,6 +37,7 @@ namespace NodePro.Modules.Display.Views
 
         private void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
+
         }
 
     }
