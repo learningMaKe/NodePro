@@ -41,5 +41,12 @@ namespace NodePro.Core.Model
             get { return _template; }
             set { SetProperty(ref _template, value); }
         }
+
+        private string _format = string.Empty;
+        public string Format
+        {
+            get { return _format; }
+            set { SetProperty(ref _format, value); }
+        }
     }
 }

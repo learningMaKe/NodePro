@@ -9,12 +9,20 @@ namespace NodePro.Core.Attrs
     [AttributeUsage(AttributeTargets.Property)]
     public class NodePropertyAttribute:Attribute
     {
+        public string Format { get; }=string.Empty;
         public string Template { get; } = string.Empty;
-        public Type? Conveter { get; } = null;
-        public NodePropertyAttribute(string template, Type? converter = null)
+        public NodePropertyAttribute(string format, string template)
         {
+            Format = format;
             Template = template;
-            Conveter = converter;
         }
     }
+
+    [AttributeUsage(AttributeTargets.Property)]
+    public class NodeOrderAttribute(int order) : Attribute
+    {
+        public int Order { get; } = order;
+    }
+
+    
 }
