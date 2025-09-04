@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\NodePro.Core\NodePro.Core.csproj" />
     <ProjectReference Include="..\..\NodePro.Services.Interfaces\NodePro.Services.Interfaces.csproj" />
+    <ProjectReference Include="..\..\NodePro.Sheet\NodePro.Sheet.csproj" />
   </ItemGroup>
 
 </Project>

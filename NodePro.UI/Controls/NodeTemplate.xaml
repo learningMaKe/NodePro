@@ -15,4 +15,8 @@
     <DataTemplate x:Key="StringValue" DataType="{x:Type model:NodeElement}">
         <TextBlock Foreground="Green" Text="{Binding Content}" />
     </DataTemplate>
+
+    <DataTemplate x:Key="TestValue" DataType="{x:Type model:NodeElement}">
+        <TextBox Foreground="Blue" Text="{Binding Content, UpdateSourceTrigger=PropertyChanged}" />
+    </DataTemplate>
 </ResourceDictionary>

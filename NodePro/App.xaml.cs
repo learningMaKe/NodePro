@@ -44,7 +44,7 @@ namespace NodePro
             foreach (Assembly assembly in assemblies) 
             {
                 Type[] types = [.. assembly.GetTypes().Where(x => x.GetCustomAttribute<NodeAttribute>() is not null)];
-                nodeToRegister.AddRange(nodeToRegister);
+                nodeToRegister.AddRange(types);
             }
             List<Type> singleNodes = RegisterSingleNode();
             nodeToRegister.AddRange(singleNodes);
@@ -64,6 +64,7 @@ namespace NodePro
         {
             List<Assembly> types = [
                 Assembly.GetExecutingAssembly(),
+                Assembly.LoadFrom("NodePro.Sheet.dll")
                 ];
             return types;
         }

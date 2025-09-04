@@ -15,10 +15,6 @@
     <convert:InverseDivide2Converter x:Key="InverseDivide2Converter" />
     <core:NodeTemplateSelector x:Key="NodeTemplate" />
 
-    <DataTemplate x:Key="DefaultNodeElementTemplateStyle" DataType="{x:Type model:NodeElement}">
-        <TextBox />
-    </DataTemplate>
-
     <DataTemplate x:Key="DefaultNodeElementHolder" DataType="{x:Type model:NodeElementGroup}">
         <ItemsControl Background="Transparent" ItemsSource="{Binding}">
             <ItemsControl.ItemTemplate>
@@ -71,6 +67,16 @@
                             </core:NodeConnector.RenderTransform>
                         </core:NodeConnector>
                     </Grid>
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding Mode}" Value="Input">
+                            <Setter TargetName="LeftConnector" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="RightConnector" Property="Visibility" Value="Hidden" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Mode}" Value="Output">
+                            <Setter TargetName="LeftConnector" Property="Visibility" Value="Hidden" />
+                            <Setter TargetName="RightConnector" Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

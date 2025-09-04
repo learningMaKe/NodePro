@@ -2,6 +2,7 @@
 using NodePro.Core.MVVM;
 using NodePro.Core.Node;
 using NodePro.Services.Interfaces;
+using NodePro.Sheet;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

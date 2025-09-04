@@ -29,7 +29,7 @@ namespace NodePro.Core
             _provider = provider;
         }
 
-        public NodeElement CreateElement(NodeSheet sheet, PropertyInfo prop, NodePropertyAttribute attribute)
+        public static NodeElement CreateElement(NodeSheet sheet, PropertyInfo prop, NodePropertyAttribute attribute)
         {
             var element = new NodeElement()
             {

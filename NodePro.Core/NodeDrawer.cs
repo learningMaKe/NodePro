@@ -31,7 +31,7 @@ namespace NodePro.Core
 
         public void DrawNode<TSheet>(Point position) where TSheet : NodeSheet
         {
-            NodeInitArgs args = new NodeInitArgs()
+            NodeInitArgs args = new()
             {
                 Position = position,
                 NodeConnect = OnNodeConnect
