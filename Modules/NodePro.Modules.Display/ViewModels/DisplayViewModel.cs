@@ -28,10 +28,11 @@ namespace NodePro.Modules.Display.ViewModels
 
         void ExecuteCanvasLoadedCommand(Canvas parameter)
         {
-            _drawer ??= new(parameter);
-            _drawer.DrawNode(new System.Windows.Point(500, 500), new DemoSheet());
-            _drawer.DrawNode(new System.Windows.Point(700, 500), new DemoSheet());
-            _drawer.DrawNode(new System.Windows.Point(900, 500), new DemoSheet());
+            _drawer ??= new NodeDrawer(_containerProvider, parameter);
+
+            _drawer.DrawNode<DemoSheet>(500, 500);
+            _drawer.DrawNode<DemoSheet>(700, 500);
+            _drawer.DrawNode<DemoSheet>(900, 500);
         }
 
         #endregion

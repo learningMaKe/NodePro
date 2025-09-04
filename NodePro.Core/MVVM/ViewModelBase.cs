@@ -9,9 +9,10 @@ namespace NodePro.Core.MVVM
 {
     public class ViewModelBase:BindableBase
     {
+        protected readonly IContainerProvider _containerProvider;
         public ViewModelBase(IContainerProvider containerProvider)
         {
-
+            _containerProvider = containerProvider;
         }
     }
 }

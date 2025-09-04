@@ -13,12 +13,17 @@ namespace NodePro.Core
 {
     public abstract class NodeSheet
     {
+
+        protected IContainerProvider _containerProvider;
+        protected NodeCreator _creator;
+
         private static readonly Dictionary<Type, (PropertyInfo, NodePropertyAttribute)[]> _reflectionProperties = [];
         public abstract string Title { get; }
 
-        protected NodeSheet() 
+        protected NodeSheet(IContainerProvider containerProvider) 
         {
-
+            _containerProvider = containerProvider;
+            _creator = containerProvider.Resolve<NodeCreator>();
         }
 
         public abstract NodeData DataProcess(NodeData data);
@@ -40,12 +45,14 @@ namespace NodePro.Core
             NodeElementGroup elements = new(attributes.Select(x => new NodeElement()
             {
                 Template = x.Item2.Template,
-                Content = x.Item1.GetValue(this)
+                Content = x.Item1.GetValue(this),
+                Sheet = this,
+                Prop = x.Item1
             }).ToArray());
             return elements;
         }
 
-        private (PropertyInfo, NodePropertyAttribute)[] GetAttributes()
+        public (PropertyInfo, NodePropertyAttribute)[] GetAttributes()
         {
             Type nodeType = this.GetType();
             (PropertyInfo, NodePropertyAttribute)[]? attributes = [];
@@ -76,10 +83,10 @@ namespace NodePro.Core
         }
     }
 
+    [Node]
     public class DemoSheet : NodeSheet
     {
         public override string Title => "测试节点";
-
 
         [NodeProperty("IntValue")]
         public string Value { get; set; } = "测试";
@@ -87,7 +94,10 @@ namespace NodePro.Core
         [NodeProperty("StringValue")]
         public string Name { get; set; } = "你也要测试吗";
 
+        public DemoSheet(IContainerProvider provider) : base(provider)
+        {
 
+        }
 
         public override NodeData DataProcess(NodeData data)
         {

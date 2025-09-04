@@ -12,26 +12,31 @@ namespace NodePro.Core
 {
     public class NodeDrawer
     {
+        private readonly IContainerProvider _containerProvider;
+        private readonly NodeCreator _creator;
+
         private readonly Canvas _canvas;
 
         private NodeContainer? _selectedContainer = null;
-        public NodeDrawer(Canvas canvas)
+        public NodeDrawer(IContainerProvider containerProvider, Canvas canvas)
         {
+            _containerProvider = containerProvider;
+            _creator = containerProvider.Resolve<NodeCreator>();
             _canvas = canvas;
         }
 
         #region Public Method
 
-        public void DrawNode<TSheet>(Point position, TSheet sheet) where TSheet : NodeSheet
+        public void DrawNode<TSheet>(double x, double y) where TSheet : NodeSheet => DrawNode<TSheet>(new System.Windows.Point(x, y));
+
+        public void DrawNode<TSheet>(Point position) where TSheet : NodeSheet
         {
-            NodeModel model = sheet.CreateModel();
-            NodeContainer container = new NodeContainer()
+            NodeInitArgs args = new NodeInitArgs()
             {
                 Position = position,
-                Header = model.Title,
-                Elements = model.Elements,
+                NodeConnect = OnNodeConnect
             };
-            container.NodeConnect += OnNodeConnect;
+            NodeContainer container = _creator.CreateContainer<TSheet>(args);
             AddToCanvas(container);
         }
 
