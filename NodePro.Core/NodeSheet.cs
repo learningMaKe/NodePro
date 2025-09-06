@@ -11,13 +11,24 @@ using System.Threading.Tasks;
 
 namespace NodePro.Core
 {
+    public class NodeProperty()
+    {
+        public required PropertyInfo Property { get; init; }
+
+        public required NodePropertyAttribute NodePropertyAttribute { get; init; }
+
+        public NodeOrderAttribute? NodeOrderAttribute { get; init; }
+
+        
+    }
+
     public abstract class NodeSheet
     {
 
         protected IContainerProvider _containerProvider;
         protected NodeCreator _creator;
 
-        private static readonly Dictionary<Type, (PropertyInfo, NodePropertyAttribute)[]> _reflectionProperties = [];
+        private static readonly Dictionary<Type, NodeProperty[]> _reflectionProperties = [];
         public abstract string Title { get; }
 
         protected NodeSheet(IContainerProvider containerProvider) 
@@ -28,10 +39,10 @@ namespace NodePro.Core
 
         public abstract NodeData DataProcess(NodeData data);
 
-        public (PropertyInfo, NodePropertyAttribute)[] GetAttributes()
+        public NodeProperty[] GetAttributes()
         {
             Type nodeType = this.GetType();
-            (PropertyInfo, NodePropertyAttribute)[]? attributes = [];
+            NodeProperty[]? attributes = [];
             try
             {
                 //attributes = _reflectionProperties.GetOrAdd(nodeType, type =>
@@ -41,12 +52,19 @@ namespace NodePro.Core
                 if(!_reflectionProperties.TryGetValue(nodeType,out attributes))
                 {
                     PropertyInfo[] props = nodeType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-                    List<(PropertyInfo, NodePropertyAttribute)> targets = [];
+                    List<NodeProperty> targets = [];
                     foreach (var prop in props)
                     {
                         NodePropertyAttribute? nodeProp = prop.GetCustomAttribute<NodePropertyAttribute>();
                         if (nodeProp is null) continue;
-                        targets.Add((prop, nodeProp));
+                        NodeOrderAttribute? nodeOrder = prop.GetCustomAttribute<NodeOrderAttribute>();
+                        NodeProperty property = new()
+                        {
+                            Property = prop,
+                            NodePropertyAttribute = nodeProp,
+                            NodeOrderAttribute = nodeOrder
+                        };
+                        targets.Add(property);
                     }
                     attributes = targets.ToArray();
                 }

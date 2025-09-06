@@ -2,6 +2,7 @@
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,7 +26,7 @@ namespace NodePro.Core.Attrs
         {
             Mode = NodeMode.Output;
             Format = format;
-            Template = TemplateKey.DefaultNodeTemplate;
+            Template = TemplateKey.DefaultOutputTemplate;
         }
     }
 

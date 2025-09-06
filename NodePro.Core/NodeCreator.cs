@@ -20,6 +20,8 @@ namespace NodePro.Core
         public NodeConnectEventHandler? NodeConnect;
 
     }
+
+    [NodeService]
     public class NodeCreator
     {
         private readonly IContainerProvider _provider;
@@ -29,14 +31,17 @@ namespace NodePro.Core
             _provider = provider;
         }
 
-        public static NodeElement CreateElement(NodeSheet sheet, PropertyInfo prop, NodePropertyAttribute attribute)
+        public static NodeElement CreateElement(NodeSheet sheet,NodeProperty property)
         {
             var element = new NodeElement()
             {
-                Template = attribute.Template,
-                Content = prop.GetValue(sheet),
+                Template = property.NodePropertyAttribute.Template,
+                Content = property.Property.GetValue(sheet),
                 Sheet = sheet,
-                Prop = prop
+                Prop = property.Property,
+                Order = property.NodeOrderAttribute?.Order ?? 0,
+                Mode = property.NodePropertyAttribute.Mode
+
             };
             return element;
         }
@@ -52,12 +57,13 @@ namespace NodePro.Core
                 sheet ??= _provider.Resolve<TSheet>();
             }
             var group = new NodeElementGroup();
-            (PropertyInfo, NodePropertyAttribute)[] props = sheet.GetAttributes();
+            NodeProperty[] props = sheet.GetAttributes();
             foreach (var prop in props)
             {
-                NodeElement element = CreateElement(sheet, prop.Item1, prop.Item2);
+                NodeElement element = CreateElement(sheet, prop);
                 group.Add(element);
             }
+            group = group.Resort();
             return group;
         }
 

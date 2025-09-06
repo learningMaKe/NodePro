@@ -8,6 +8,11 @@
         <TextBlock Text="{Binding Content}" />
     </DataTemplate>
 
+    <DataTemplate x:Key="DefaultOutputTemplate" DataType="{x:Type model:NodeElement}">
+        <TextBlock HorizontalAlignment="Right" Text="{Binding Content}" />
+    </DataTemplate>
+
+
     <DataTemplate x:Key="IntValue" DataType="{x:Type model:NodeElement}">
         <TextBlock Foreground="Red" Text="{Binding Content}" />
     </DataTemplate>

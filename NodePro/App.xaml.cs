@@ -27,7 +27,15 @@ namespace NodePro
         {
             containerRegistry.RegisterSingleton<IContentDialogService, ContentDialogService>();
             containerRegistry.RegisterSingleton<INodeService, NodeService>();
-            RegisterNode(containerRegistry);
+            NodeRegister register = NodeRegister.Combine(NodeRegisterPath.ConfigPath, NodeRegisterPath.DllDirPath);
+            foreach(var serviceType in register.ServiceType)
+            {
+                containerRegistry.RegisterSingleton(serviceType);
+            }
+            foreach(var nodeType in register.NodeType)
+            { 
+                containerRegistry.Register(nodeType);
+            }
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
@@ -35,46 +43,6 @@ namespace NodePro
             base.ConfigureModuleCatalog(moduleCatalog);
             moduleCatalog.AddModule<NodePro.Modules.Display.DisplayModule>();
         }
-
-        private void RegisterNode(IContainerRegistry containerRegistry)
-        {
-            RegisterNodeService(containerRegistry);
-            List<Assembly> assemblies = RegisterNodeAssembly();
-            List<Type> nodeToRegister = [];
-            foreach (Assembly assembly in assemblies) 
-            {
-                Type[] types = [.. assembly.GetTypes().Where(x => x.GetCustomAttribute<NodeAttribute>() is not null)];
-                nodeToRegister.AddRange(types);
-            }
-            List<Type> singleNodes = RegisterSingleNode();
-            nodeToRegister.AddRange(singleNodes);
-            foreach (Type type in nodeToRegister)
-            {
-                containerRegistry.Register(type);
-            }
-        }
-
-        private void RegisterNodeService(IContainerRegistry containerRegistry)
-        {
-            containerRegistry.RegisterSingleton<NodeCreator>();
-            containerRegistry.RegisterSingleton<NodeFormatter>();
-        }
-
-        private List<Assembly> RegisterNodeAssembly()
-        {
-            List<Assembly> types = [
-                Assembly.GetExecutingAssembly(),
-                Assembly.LoadFrom("NodePro.Sheet.dll")
-                ];
-            return types;
-        }
-
-        private List<Type> RegisterSingleNode()
-        {
-            return [];
-        }
-
-
 
     }
 

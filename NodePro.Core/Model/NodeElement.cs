@@ -30,6 +30,21 @@ namespace NodePro.Core.Model
                 this.Add(element); 
             }
         }
+
+        public NodeElementGroup Resort()
+        {
+            // 优化点1：用OrderByDescending替代OrderBy+Reverse，减少一次反转操作
+            // 优化点2：直接构建排序后的序列，减少中间数组创建
+            var sortedElements = this
+                .Where(x => x.Mode == NodeMode.Output)
+                .OrderByDescending(x => x.Order) // 等价于OrderBy(x => x.Order).Reverse()
+                .Concat(this
+                    .Where(x => x.Mode == NodeMode.Input)
+                    .OrderByDescending(x => x.Order)
+                );
+
+            return new NodeElementGroup(sortedElements.ToArray());
+        }
     }
 
     public class NodeElement:BindableBase
@@ -74,6 +89,14 @@ namespace NodePro.Core.Model
             get { return _mode; }
             set { SetProperty(ref _mode, value); }
         }
+
+        private int _order;
+        public int Order
+        {
+            get { return _order; }
+            set { SetProperty(ref _order, value); }
+        }
+
         #endregion
 
         public Action<object?>? ContentChanged = null;

@@ -8,6 +8,7 @@ namespace NodePro.Core
 {
     public class TemplateKey
     {
+        public const string DefaultOutputTemplate = "DefaultOutputTemplate";
 
         public const string DefaultNodeTemplate = "DefaultNodeTemplate";
 
