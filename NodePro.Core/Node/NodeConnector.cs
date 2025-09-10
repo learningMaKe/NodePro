@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodePro.Core.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Shapes;
 
 namespace NodePro.Core.Node
@@ -31,12 +33,15 @@ namespace NodePro.Core.Node
 
     public delegate void ConnectEventHandler(object sender, ConnectEventArgs e);
 
-    public class NodeConnector : Control
+    public class NodeConnector : Control,INotifyPosition
     {
         #region Properties
 
         private Point _position = new Point();
         private bool _isDrag = false;
+        private GeneralTransform? _transform;
+
+
 
         #endregion
 
@@ -81,7 +86,6 @@ namespace NodePro.Core.Node
 
         public static DelegateCommand<DragEventArgs> DropCommand { get; } = new DelegateCommand<DragEventArgs>(ExecuteDropCommand);
         public static DelegateCommand<MouseButtonEventArgs> DropStartCommand { get; } = new DelegateCommand<MouseButtonEventArgs>(ExecuteDropStartCommand);
-
         public static DelegateCommand<MouseEventArgs> DropMoveCommand { get; } = new DelegateCommand<MouseEventArgs>(ExecuteDropMoveCommand);
         #endregion
 
@@ -122,10 +126,41 @@ namespace NodePro.Core.Node
 
         #endregion
 
+        public NodeConnector()
+        {
+            this.Loaded += OnConnectorLoaded;
+        }
+
 
         static NodeConnector()
         {
 
+        }
+
+        public Point Position
+        {
+            get
+            {
+                Point point = new Point();
+                if (NodeParent is null) return point;
+                _transform ??= this.TransformToAncestor(NodeParent);
+                Point newPos = _transform.Transform(point);
+                Point parentPos = NodeParent.Position;
+                return new Point(parentPos.X + newPos.X + this.ActualWidth / 2, parentPos.Y + newPos.Y + this.ActualHeight / 2);
+            }
+        }
+
+        public PositionChangedEventHandler? PositionChangedEventHandler { get; set; }
+
+        private void OnConnectorLoaded(object sender, RoutedEventArgs e)
+        {
+            if (NodeParent is not INotifyPosition notifier) return;
+            notifier.PositionChangedEventHandler += OnNodePositionChangedEvent;
+        }
+
+        private void OnNodePositionChangedEvent(INotifyPosition notifier, PositionChangedEventArgs args)
+        {
+            PositionChangedEventHandler?.Invoke(this, args);
         }
 
         private static void ExecuteDropCommand(DragEventArgs args)

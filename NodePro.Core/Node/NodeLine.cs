@@ -4,12 +4,31 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace NodePro.Core.Node
 {
-    public class NodeLine:FrameworkElement
+    public class NodeLine:Control
     {
+        private readonly NodeConnectEventArgs? _args;
+        private LineCalculateMode _mode = LineCalculateMode.Straight;
+        private INodeLineCalculator? _lineCalculator;
+
+        public ConnectionEndpoint Source {  get; private set; }
+
+        public ConnectionEndpoint Target { get; private set; }
+
+        public LineCalculateMode Mode
+        {
+            get => _mode;
+            set
+            {
+                if (_mode == value) return;
+                _mode = value;
+                OnModeChanged();
+            }
+        }
 
 
         public PathGeometry Data
@@ -24,31 +43,45 @@ namespace NodePro.Core.Node
 
 
 
-        public LineCalculateMode CalculateMode
+
+        public NodeLine(NodeConnectEventArgs args)
         {
-            get { return (LineCalculateMode)GetValue(CalculateModeProperty); }
-            set { SetValue(CalculateModeProperty, value); }
+            _args = args;
+            _lineCalculator = LineCalculatorFactory.GetCalculator(_mode);
+            Data = new PathGeometry();
+            Source = args.NodeSource;
+            Target = args.NodeTarget;
+
+            // Source.Node.Move += OnNodeMove;
+            // Target.Node.Move += OnNodeMove;
+            WeakEventManager<NodeContainer, MoveEventArgs>.AddHandler(Source.Node, "Move", OnNodeMove);
+            WeakEventManager<NodeContainer, MoveEventArgs>.AddHandler(Target.Node, "Move", OnNodeMove);
+            Recalculate();
         }
 
-        // Using a DependencyProperty as the backing store for CalculateMode.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty CalculateModeProperty =
-            DependencyProperty.Register("CalculateMode", typeof(LineCalculateMode), typeof(NodeLine), new PropertyMetadata(LineCalculateMode.Straight,OnCalculateModeChanged));
-
-        private static void OnCalculateModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        public NodeLine(Point source,Point target)
         {
-            if(d is NodeLine line)
-            {
-                line.Calculator = LineCalculatorFactory.GetCalculator((LineCalculateMode)e.NewValue);
-            }
+
         }
 
-        private INodeLineCalculator? Calculator { get; set; } = null;
-
-        public NodeLine()
+        private void OnNodeMove(object? container, MoveEventArgs args)
         {
-                
+            Recalculate();
         }
 
+        private void OnModeChanged()
+        {
+            _lineCalculator = LineCalculatorFactory.GetCalculator(_mode);
+            Recalculate();
+        }
 
+        private void Recalculate()
+        {
+            Data.Clear();
+            if (_lineCalculator is null) return;
+            PathFigure figure = _lineCalculator.Calculate(Source.Connector.Position, Target.Connector.Position);
+            Data.Figures.Add(figure);
+
+        }
     }
 }

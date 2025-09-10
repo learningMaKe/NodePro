@@ -89,5 +89,15 @@ namespace NodePro.Core
             }
             return container;
         }
+
+        public NodeLine CreateLine(NodeConnectEventArgs args)
+        {
+            NodeLine line = new NodeLine(args)
+            {
+
+            };
+            return line;
+        }
+
     }
 }

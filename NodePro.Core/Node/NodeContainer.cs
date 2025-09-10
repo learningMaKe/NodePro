@@ -1,4 +1,5 @@
-﻿using NodePro.Core.Model;
+﻿using NodePro.Core.Interfaces;
+using NodePro.Core.Model;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -40,7 +41,7 @@ namespace NodePro.Core.Node
     public delegate void MoveEventHandler(object container, MoveEventArgs args);
 
     [ContentProperty("Elements")]
-    public class NodeContainer:Expander
+    public class NodeContainer:Expander,INotifyPosition
     {
 
         #region Fields
@@ -113,9 +114,18 @@ namespace NodePro.Core.Node
 
         // Using a DependencyProperty as the backing store for Position.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty PositionProperty =
-            DependencyProperty.Register("Position", typeof(Point), typeof(NodeContainer), new PropertyMetadata(null));
+            DependencyProperty.Register("Position", typeof(Point), typeof(NodeContainer), new PropertyMetadata(new Point(),OnPositionChanged));
 
-
+        private static void OnPositionChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is not NodeContainer container) return;
+            PositionChangedEventArgs args = new()
+            {
+                OldPosition = (Point)e.OldValue,
+                NewPosition = (Point)e.NewValue,
+            };
+            container.PositionChangedEventHandler?.Invoke(container, args);
+        }
 
         public NodeTemplateSelector ElementSelector
         {
@@ -235,6 +245,12 @@ namespace NodePro.Core.Node
         }
 
         #endregion
+
+        #endregion
+
+        #region Events
+
+        public PositionChangedEventHandler? PositionChangedEventHandler { get; set; }
 
         #endregion
 

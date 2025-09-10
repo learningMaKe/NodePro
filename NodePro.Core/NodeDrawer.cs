@@ -42,7 +42,8 @@ namespace NodePro.Core
 
         public  void DrawConnect(NodeConnectEventArgs args)
         {
-
+            NodeLine tracker = _creator.CreateLine(args);
+            AddToCanvas(tracker);
         }
 
         private void OnNodeConnect(object sender, NodeConnectEventArgs args)
@@ -56,12 +57,6 @@ namespace NodePro.Core
             _canvas.Children.Add(element);
         }
 
-
-
-
-
         #endregion
-
-
     }
 }

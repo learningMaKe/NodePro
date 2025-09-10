@@ -7,6 +7,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <BaseOutputPath>$(SolutionDir)Output</BaseOutputPath>
+    <DynamicPath>$(SoultionDir)Output\Dll\</DynamicPath>
   </PropertyGroup>
 
   <ItemGroup>

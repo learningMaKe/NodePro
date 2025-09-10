@@ -8,8 +8,11 @@
         <ResourceDictionary Source="/NodePro.UI;component/Controls/NodeContainer.xaml" />
         <ResourceDictionary Source="/NodePro.UI;component/Controls/NodeConnector.xaml" />
         <ResourceDictionary Source="/NodePro.UI;component/Controls/NodeTemplate.xaml" />
+        <ResourceDictionary Source="/NodePro.UI;component/Controls/NodeLine.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <Style BasedOn="{StaticResource DefaultNodeContainer}" TargetType="{x:Type core:NodeContainer}" />
     <Style BasedOn="{StaticResource DefaultNodeConnector}" TargetType="{x:Type core:NodeConnector}" />
+    <Style BasedOn="{StaticResource DefaultNodeLine}" TargetType="{x:Type core:NodeLine}" />
+
 </ResourceDictionary>
