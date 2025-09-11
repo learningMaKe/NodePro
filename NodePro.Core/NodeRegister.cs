@@ -1,6 +1,9 @@
 ﻿using NodePro.Core.Attrs;
+using Prism.Ioc;
 using System;
 using System.Collections.Generic;
+using System.Composition.Convention;
+using System.Composition.Hosting;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -27,33 +30,44 @@ namespace NodePro.Core
         public const string ConfigPath = "Config\\Node.Config";
         public const string DllDirPath = "Dll\\";
     }
+
+    public class NodeRegisterKey
+    {
+        public const string Services = "Services";
+        public const string Nodes = "Nodes";
+
+        public required string Key { get; set; }
+
+        public Action<Type>? Selected { get; set; }
+        public required Func<Type, bool> Filter { get; set; }
+
+        public NodeRegisterKey()
+        {
+                
+        }
+    }
+
     public class NodeRegister
     {
 
         private readonly NodeConfig? _config;
+        private readonly Dictionary<string, List<Type>> _scannedTypes = [];
+        private readonly List<NodeRegisterKey> _registerKeys = [];
 
-        private readonly List<Type> _servicesTypes = [];
-        private readonly List<Type> _nodeTypes = [];
 
-
+        public Assembly[] DllGroup { get; set; }
+ 
         public NodeRegister(string path)
         {
             _config = LoadConfig(path);
-            var group = ReadConfig(_config);
-            
-            _servicesTypes = group.Item1;
-            _nodeTypes = group.Item2;
+            DllGroup = ReadConfig(_config);
         }
 
-        public NodeRegister(List<Type> serviceType, List<Type> nodeType)
+        private NodeRegister(Assembly[] assemblies)
         {
-            _servicesTypes = serviceType;
-            _nodeTypes = nodeType;
+            DllGroup = assemblies;
         }
 
-        public List<Type> ServiceType => _servicesTypes;
-
-        public List<Type> NodeType => _nodeTypes;
 
         public static NodeRegister Combine(params string[] paths)
         {
@@ -63,10 +77,47 @@ namespace NodePro.Core
 
         public static NodeRegister Combine(params NodeRegister[] registers)
         {
-            List<Type> serviceType = [.. registers.Select(reg => reg.ServiceType).SelectMany(x => x)];
-            List<Type> nodeType = [.. registers.Select(reg => reg.NodeType).SelectMany(x => x)];
-            return new NodeRegister(serviceType,nodeType);
+            List<Assembly> assemblies = registers.Select(x => x.DllGroup).SelectMany(x => x).ToList();
+            return new NodeRegister(assemblies.ToArray());
         }
+
+        public List<Type> GetScannedTypes(string key)
+        {
+            if (_scannedTypes.TryGetValue(key, out List<Type>? types)) return types;
+            return [];
+        }
+
+        public NodeRegister AddKey(NodeRegisterKey key)
+        {
+            _registerKeys.Add(key);
+            return this;
+        }
+
+        public NodeRegister Scan()
+        {
+            Type[] typesToScan = DllGroup.Select(x => x.GetTypes()).SelectMany(x => x).ToArray() ?? [];
+            NodeRegisterKey[] vaildKeys = _registerKeys.Where(x => !_scannedTypes.ContainsKey(x.Key)).ToArray();
+            foreach(var key in vaildKeys)
+            {
+                _scannedTypes.TryAdd(key.Key, []);
+            }
+            foreach(var type in typesToScan)
+            {
+                if (!type.IsClass || type.IsAbstract) continue;
+                foreach (var key in vaildKeys)
+                {
+                    if (key.Filter?.Invoke(type) == false) continue;
+                    var typeGroup = _scannedTypes.GetValueOrDefault(key.Key);
+                    if (typeGroup == null) continue;
+                    typeGroup.Add(type);
+                    key.Selected?.Invoke(type);
+                }
+            }
+            _registerKeys.Clear();
+            return this;
+        }
+
+
 
         private static string SerializeConfig(NodeConfig config)
         {
@@ -97,11 +148,11 @@ namespace NodePro.Core
                    && string.Equals(Path.GetExtension(path), ".dll", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static (List<Type>, List<Type>) ReadConfig(NodeConfig config)
+        private static Assembly[] ReadConfig(NodeConfig config)
         {
             // 验证配置和DLL列表
             if (config?.DllGroup == null || config.DllGroup.Count == 0)
-                return ([], []);
+                return [];
 
 
             HashSet<Assembly> assemblies = [];
@@ -134,38 +185,7 @@ namespace NodePro.Core
             AddAssemblyIfNotExists(Assembly.GetCallingAssembly());
             AddAssemblyIfNotExists(Assembly.GetExecutingAssembly());
 
-            // 筛选带有指定特性的类型
-            List<Type> serviceTypes = [];
-            List<Type> nodeTypes = [];
-
-            foreach (Assembly assembly in assemblies)
-            {
-                try
-                {
-                    foreach (Type type in assembly.GetTypes())
-                    {
-                        if (type.IsDefined(typeof(NodeServiceAttribute), inherit: false))
-                        {
-                            serviceTypes.Add(type);
-                        }
-                        if (type.IsDefined(typeof(NodeAttribute), inherit: false))
-                        {
-                            nodeTypes.Add(type);
-                        }
-                    }
-                }
-                catch (ReflectionTypeLoadException ex)
-                {
-                    // 处理类型加载异常
-                    Debug.WriteLine($"解析程序集 {assembly.FullName} 中的类型失败: {ex.Message}");
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"处理程序集 {assembly.FullName} 时出错: {ex.Message}");
-                }
-            }
-
-            return (serviceTypes, nodeTypes);
+            return assemblies.ToArray();
         }
 
         private static NodeConfig LoadConfig(string path)
@@ -227,5 +247,31 @@ namespace NodePro.Core
             return config;
         }
 
+    }
+
+    public static class NodeConstants
+    {
+        public static readonly NodeRegister DefaultRegister;
+
+        public static readonly NodeRegisterKey ScanService;
+
+        public static readonly NodeRegisterKey ScanNode;
+
+        static NodeConstants()
+        {
+            ScanService = new NodeRegisterKey()
+            { 
+                Key=NodeRegisterKey.Services,
+                Filter = x=> x.GetCustomAttribute<NodeServiceAttribute>() != null
+            };
+            ScanNode = new NodeRegisterKey()
+            {
+                Key = NodeRegisterKey.Nodes,
+                Filter = x => x.GetCustomAttribute<NodeAttribute>() != null
+            };
+            DefaultRegister = NodeRegister.Combine(NodeRegisterPath.ConfigPath, NodeRegisterPath.DllDirPath);
+            DefaultRegister.AddKey(ScanNode).AddKey(ScanService).Scan();
+
+        }
     }
 }

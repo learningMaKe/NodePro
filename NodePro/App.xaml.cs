@@ -27,12 +27,12 @@ namespace NodePro
         {
             containerRegistry.RegisterSingleton<IContentDialogService, ContentDialogService>();
             containerRegistry.RegisterSingleton<INodeService, NodeService>();
-            NodeRegister register = NodeRegister.Combine(NodeRegisterPath.ConfigPath, NodeRegisterPath.DllDirPath);
-            foreach(var serviceType in register.ServiceType)
+            NodeRegister register = NodeConstants.DefaultRegister;
+            foreach(var serviceType in register.GetScannedTypes(NodeRegisterKey.Services))
             {
                 containerRegistry.RegisterSingleton(serviceType);
             }
-            foreach(var nodeType in register.NodeType)
+            foreach(var nodeType in register.GetScannedTypes(NodeRegisterKey.Nodes))
             { 
                 containerRegistry.Register(nodeType);
             }

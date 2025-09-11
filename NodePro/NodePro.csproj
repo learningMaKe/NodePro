@@ -24,4 +24,8 @@
     <ProjectReference Include="..\NodePro.UI\NodePro.UI.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Config\" />
+  </ItemGroup>
+
 </Project>

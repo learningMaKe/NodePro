@@ -1,4 +1,5 @@
 ﻿using NodePro.Core.Attrs;
+using NodePro.Core.Exceptions;
 using NodePro.Core.Model;
 using NodePro.Core.Node;
 using Prism.Ioc;
@@ -71,7 +72,7 @@ namespace NodePro.Core
         {
             if (!_provider.IsRegistered<TSheet>())
             {
-                throw new InvalidOperationException($"未注册的节点类型:{typeof(TSheet).FullName}");
+                NodeMissingException.Throw<TSheet>();
             }
             var sheet = _provider.Resolve<TSheet>();
             args ??= new NodeInitArgs();
