@@ -51,7 +51,7 @@ namespace NodePro.Core
     {
 
         private readonly NodeConfig? _config;
-        private readonly Dictionary<string, List<Type>> _scannedTypes = [];
+        private readonly Dictionary<string, HashSet<Type>> _scannedTypes = [];
         private readonly List<NodeRegisterKey> _registerKeys = [];
 
 
@@ -77,18 +77,19 @@ namespace NodePro.Core
 
         public static NodeRegister Combine(params NodeRegister[] registers)
         {
-            List<Assembly> assemblies = registers.Select(x => x.DllGroup).SelectMany(x => x).ToList();
+            List<Assembly> assemblies = registers.Select(x => x.DllGroup).SelectMany(x => x).DistinctBy(x => x.FullName).ToList();
             return new NodeRegister(assemblies.ToArray());
         }
 
         public List<Type> GetScannedTypes(string key)
         {
-            if (_scannedTypes.TryGetValue(key, out List<Type>? types)) return types;
+            if (_scannedTypes.TryGetValue(key, out HashSet<Type>? types)) return types.ToList();
             return [];
         }
 
         public NodeRegister AddKey(NodeRegisterKey key)
         {
+            if (_registerKeys.Any(x => x.Key == key.Key)) return this;
             _registerKeys.Add(key);
             return this;
         }
@@ -251,26 +252,32 @@ namespace NodePro.Core
 
     public static class NodeConstants
     {
-        public static readonly NodeRegister DefaultRegister;
+        private static readonly Lazy<NodeRegister> _defaultRegister = new Lazy<NodeRegister>(CreateDefaultRegister);
+        public static NodeRegister DefaultRegister => _defaultRegister.Value;
 
-        public static readonly NodeRegisterKey ScanService;
+        public static NodeRegisterKey ScanService { get; private set; }
 
-        public static readonly NodeRegisterKey ScanNode;
+        public static NodeRegisterKey ScanNode { get; private set; }
 
         static NodeConstants()
         {
             ScanService = new NodeRegisterKey()
-            { 
-                Key=NodeRegisterKey.Services,
-                Filter = x=> x.GetCustomAttribute<NodeServiceAttribute>() != null
+            {
+                Key = NodeRegisterKey.Services,
+                Filter = x => x.GetCustomAttribute<NodeServiceAttribute>() != null
             };
             ScanNode = new NodeRegisterKey()
             {
                 Key = NodeRegisterKey.Nodes,
                 Filter = x => x.GetCustomAttribute<NodeAttribute>() != null
             };
-            DefaultRegister = NodeRegister.Combine(NodeRegisterPath.ConfigPath, NodeRegisterPath.DllDirPath);
-            DefaultRegister.AddKey(ScanNode).AddKey(ScanService).Scan();
+        }
+
+        private static NodeRegister CreateDefaultRegister()
+        {
+            NodeRegister register = NodeRegister.Combine(NodeRegisterPath.ConfigPath, NodeRegisterPath.DllDirPath);
+            register.AddKey(ScanNode).AddKey(ScanService).Scan();
+            return register;
 
         }
     }
