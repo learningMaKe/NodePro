@@ -31,7 +31,19 @@ namespace NodePro.Core.Node
         }
     }
 
+    public class ConnectStartEventArgs:RoutedEventArgs
+    {
+        public NodeConnector From { get; private set; }
+        public ConnectStartEventArgs(RoutedEvent routed, NodeConnector from):base(routed)
+        {
+            From = from;
+        }
+
+    }
+
     public delegate void ConnectEventHandler(object sender, ConnectEventArgs e);
+
+    public delegate void ConnectStartEventHandler(object sender, ConnectStartEventArgs e);
 
     public class NodeConnector : Control,INotifyPosition
     {
@@ -82,13 +94,6 @@ namespace NodePro.Core.Node
 
         #endregion
 
-        #region Delegate Command
-
-        public static DelegateCommand<DragEventArgs> DropCommand { get; } = new DelegateCommand<DragEventArgs>(ExecuteDropCommand);
-        public static DelegateCommand<MouseButtonEventArgs> DropStartCommand { get; } = new DelegateCommand<MouseButtonEventArgs>(ExecuteDropStartCommand);
-        public static DelegateCommand<MouseEventArgs> DropMoveCommand { get; } = new DelegateCommand<MouseEventArgs>(ExecuteDropMoveCommand);
-        #endregion
-
         #region Routed Event
 
         #region ConnectEvent
@@ -121,62 +126,67 @@ namespace NodePro.Core.Node
 
         #region Drop Event
 
+        public static readonly RoutedEvent ConnectStartEvent = EventManager.RegisterRoutedEvent("ConnectStart", RoutingStrategy.Bubble, typeof(ConnectStartEventHandler), typeof(NodeConnector));
+
+        public event ConnectStartEventHandler ConnectStart
+        {
+            add { AddHandler(ConnectStartEvent, value); }
+            remove => RemoveHandler(ConnectStartEvent, value);
+        }
+        
+        private void OnConnectStart()
+        {
+            var args = new ConnectStartEventArgs(ConnectStartEvent, this);
+            RaiseEvent(args);
+        }
 
         #endregion
 
         #endregion
 
+        #region Constructor
         public NodeConnector()
         {
             this.Loaded += OnConnectorLoaded;
+            this.Drop += OnNodeDrop;
+            this.PreviewMouseLeftButtonDown+= OnPreviewMouseLeftButtonDown;
+            this.PreviewMouseMove += OnPreviewMouseMove;
         }
 
-
-        static NodeConnector()
+        private void OnPreviewMouseMove(object sender, MouseEventArgs e)
         {
+            if (e.LeftButton != MouseButtonState.Pressed) return;
+            if (!_isDrag) return; 
+            Point start = _position;
+            Point current = e.GetPosition(null);
+            double horizontalDiff = Math.Abs(current.X - start.X);
+            double verticalDiff = Math.Abs(current.Y - start.Y);
 
-        }
-
-        public Point Position
-        {
-            get
+            // 当水平或垂直距离超过系统默认阈值时，启动拖放
+            if (horizontalDiff > SystemParameters.MinimumHorizontalDragDistance ||
+                verticalDiff > SystemParameters.MinimumVerticalDragDistance)
             {
-                Point point = new Point();
-                if (NodeParent is null) return point;
-                _transform ??= this.TransformToAncestor(NodeParent);
-                Point newPos = _transform.Transform(point);
-                Point parentPos = NodeParent.Position;
-                return new Point(parentPos.X + newPos.X + this.ActualWidth / 2, parentPos.Y + newPos.Y + this.ActualHeight / 2);
+                _position = current;
+                OnConnectStart();
+                _isDrag = false;
             }
         }
 
-        public PositionChangedEventHandler? PositionChangedEventHandler { get; set; }
-
-        private void OnConnectorLoaded(object sender, RoutedEventArgs e)
+        private void OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (NodeParent is not INotifyPosition notifier) return;
-            notifier.PositionChangedEventHandler += OnNodePositionChangedEvent;
+            _position = e.GetPosition(null);
+            _isDrag = true;
         }
 
-        private void OnNodePositionChangedEvent(INotifyPosition notifier, PositionChangedEventArgs args)
+        private void OnNodeDrop(object sender, DragEventArgs e)
         {
-            PositionChangedEventHandler?.Invoke(this, args);
-        }
-
-        private static void ExecuteDropCommand(DragEventArgs args)
-        {
-            // 验证源对象
-            if (args.Source is not DependencyObject obj) return;
+            if (e.Source is not DependencyObject obj) return;
 
             // 获取拖拽的源连接器
-            if (args.Data.GetData(typeof(NodeConnector)) is not NodeConnector source) return;
-
-            // 获取目标连接器
-            var target = NodeHelper.GetConnector(obj);
-            if (target == null) return;
+            if (e.Data.GetData(typeof(NodeConnector)) is not NodeConnector source) return;
 
             // 1. 检查源和目标是否属于同一个父节点（防止节点自连）
-            if (source.NodeParent == target.NodeParent)
+            if (source.NodeParent == NodeParent)
             {
                 System.Diagnostics.Debug.WriteLine("无效连接：不能在同一节点的连接器之间建立连接");
                 return;
@@ -187,16 +197,16 @@ namespace NodePro.Core.Node
             NodeConnector actualTarget;
 
             // 3. 判断连接方向并处理
-            if (source.ConnectorType == ConnectorType.Output && target.ConnectorType == ConnectorType.Input)
+            if (source.ConnectorType == ConnectorType.Output && ConnectorType == ConnectorType.Input)
             {
                 // 情况1：正常方向（输出→输入），直接使用原始对象
                 actualSource = source;
-                actualTarget = target;
+                actualTarget = this;
             }
-            else if (source.ConnectorType == ConnectorType.Input && target.ConnectorType == ConnectorType.Output)
+            else if (source.ConnectorType == ConnectorType.Input && ConnectorType == ConnectorType.Output)
             {
                 // 情况2：反向连接（输入→输出），自动反转方向
-                actualSource = target;  // 输出节点作为实际源
+                actualSource = this;  // 输出节点作为实际源
                 actualTarget = source;  // 输入节点作为实际目标
             }
             else
@@ -210,35 +220,36 @@ namespace NodePro.Core.Node
             actualTarget.OnConnect(actualSource, actualTarget);
         }
 
-        private static void ExecuteDropStartCommand(MouseButtonEventArgs args)
+        static NodeConnector()
         {
-            if (args.Source is not DependencyObject obj) return;
-            var source = NodeHelper.GetConnector(obj);
-            if (source == null) return;
-            source._position = args.GetPosition(null);
-            source._isDrag = true;
+
         }
 
-        private static void ExecuteDropMoveCommand(MouseEventArgs args)
+        #endregion
+        public Point Position
         {
-            if (args.LeftButton != MouseButtonState.Pressed) return;
-            if (args.Source is not DependencyObject obj) return;
-            var source = NodeHelper.GetConnector(obj);
-            if (source == null) return;
-            Point start = source._position;
-            Point current = args.GetPosition(null);
-            double horizontalDiff = Math.Abs(current.X - start.X);
-            double verticalDiff = Math.Abs(current.Y - start.Y);
-
-            // 当水平或垂直距离超过系统默认阈值时，启动拖放
-            if (horizontalDiff > SystemParameters.MinimumHorizontalDragDistance ||
-                verticalDiff > SystemParameters.MinimumVerticalDragDistance)
+            get
             {
-                source._position = current;
-                DragDrop.DoDragDrop(obj, source, DragDropEffects.Move);
-
-
+                Point point = new Point();
+                if (NodeParent is null) return point;
+                _transform ??= this.TransformToAncestor(NodeParent);
+                Point newPos = _transform.Transform(point);
+                Point parentPos = NodeParent.Position;
+                return new Point(parentPos.X + newPos.X + this.ActualWidth / 2, parentPos.Y + newPos.Y + this.ActualHeight / 2);
             }
+        }
+
+        public event PositionChangedEventHandler? PositionChangedEventHandler;
+
+        private void OnConnectorLoaded(object sender, RoutedEventArgs e)
+        {
+            if (NodeParent is not INotifyPosition notifier) return;
+            notifier.PositionChangedEventHandler += OnNodePositionChangedEvent;
+        }
+
+        private void OnNodePositionChangedEvent(object notifier, PositionChangedEventArgs args)
+        {
+            PositionChangedEventHandler?.Invoke(this, args);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using NodePro.Core.Attrs;
+using NodePro.Core.Lines;
 using NodePro.Core.Node;
 using System;
 using System.Collections.Generic;
@@ -59,10 +60,9 @@ namespace NodePro.Core
             foreach (LineCalculateMode mode in enumValues)
             {
                 var memberInfo = enumType.GetMember(mode.ToString())[0];
-                var attribute = memberInfo.GetCustomAttributes(typeof(NodeLineAttribute), false)
-                                          .FirstOrDefault() as NodeLineAttribute;
 
-                if (attribute is null) continue;
+                if (memberInfo.GetCustomAttributes(typeof(NodeLineAttribute), false)
+                                          .FirstOrDefault() is not NodeLineAttribute attribute) continue;
                 _reflectionMap.TryAdd(mode, attribute.CalculatorType);
 
             }
@@ -71,13 +71,11 @@ namespace NodePro.Core
 
     public enum LineCalculateMode
     {
-        [NodeLine(typeof(StraightLineCalculator))]
+        [NodeLine(typeof(StraightLine))]
         Straight,
 
-        // 可以在这里添加更多线条类型
-        // [NodeLine(typeof(CurvedLineCalculator))]
-        // Curved,
-        // 
+        [NodeLine(typeof(CurveLine))]
+        Curved,
         // [NodeLine(typeof(AngledLineCalculator))]
         // Angled
     }
@@ -87,22 +85,4 @@ namespace NodePro.Core
         PathFigure Calculate(Point start, Point end);
     }
 
-    public class StraightLineCalculator : INodeLineCalculator
-    {
-        public PathFigure Calculate(Point start, Point end)
-        {
-            // 创建直线图形
-            var figure = new PathFigure
-            {
-                StartPoint = start,
-                IsClosed = false,
-                IsFilled = false
-            };
-
-            // 添加直线段
-            figure.Segments.Add(new LineSegment(end, true));
-
-            return figure;
-        }
-    }
 }

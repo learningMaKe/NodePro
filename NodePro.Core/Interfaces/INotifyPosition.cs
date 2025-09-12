@@ -9,14 +9,16 @@ namespace NodePro.Core.Interfaces
 {
     public class PositionChangedEventArgs : EventArgs
     {
+        public required INotifyPosition Notifier;
         public Point OldPosition;
         public Point NewPosition;
+
     }
 
-    public delegate void PositionChangedEventHandler(INotifyPosition notifier, PositionChangedEventArgs args);
+    public delegate void PositionChangedEventHandler(object notifier, PositionChangedEventArgs args);
     public interface INotifyPosition
     {
-        public PositionChangedEventHandler? PositionChangedEventHandler { get; set; }
+        public event PositionChangedEventHandler? PositionChangedEventHandler;
 
         public Point Position { get; }
     }

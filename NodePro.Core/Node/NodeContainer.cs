@@ -36,9 +36,20 @@ namespace NodePro.Core.Node
         public DragDeltaEventArgs Args { get; } = args ?? throw new ArgumentNullException(nameof(args));
     }
 
+    public class NodeConnectStartEventArgs : RoutedEventArgs
+    {
+        public ConnectionEndpoint StartFrom { get; init; }
+        public NodeConnectStartEventArgs(RoutedEvent routed, ConnectionEndpoint endpoint):base(routed)
+        {
+            StartFrom = endpoint;
+        }
+    }
+
     public delegate void NodeConnectEventHandler(object sender, NodeConnectEventArgs args);
 
     public delegate void MoveEventHandler(object container, MoveEventArgs args);
+
+    public delegate void NodeConnectStartEventHandler(object sender, NodeConnectStartEventArgs args);
 
     [ContentProperty("Elements")]
     public class NodeContainer:Expander,INotifyPosition
@@ -121,6 +132,7 @@ namespace NodePro.Core.Node
             if (d is not NodeContainer container) return;
             PositionChangedEventArgs args = new()
             {
+                Notifier = container,
                 OldPosition = (Point)e.OldValue,
                 NewPosition = (Point)e.NewValue,
             };
@@ -142,8 +154,6 @@ namespace NodePro.Core.Node
 
         #region Delegate Command
         public DelegateCommand HeaderClickedCommand { get; }
-        public static DelegateCommand<ConnectEventArgs> InputConnectCommand { get; } = new(ExecuteInputConnectCommand);
-        public static DelegateCommand<ConnectEventArgs> OutputConnectCommand { get; } = new(ExecuteOutputConnectCommand);
         public DelegateCommand<DragDeltaEventArgs> MoveCommand { get; }
 
 
@@ -152,7 +162,8 @@ namespace NodePro.Core.Node
         #region Routed Event
 
         #region Selected Event
-        public static readonly RoutedEvent SelectedEvent = EventManager.RegisterRoutedEvent(
+
+        public static readonly RoutedEvent SelectedEvent =  EventManager.RegisterRoutedEvent(
             "Selected", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(NodeContainer));
 
         
@@ -244,13 +255,45 @@ namespace NodePro.Core.Node
             RaiseEvent(moveArgs);
         }
 
+        public static readonly RoutedEvent NodeConnectStartEvent = EventManager.RegisterRoutedEvent("NodeConnectStart", RoutingStrategy.Bubble, typeof(NodeConnectStartEventHandler), typeof(NodeContainer));
+
+        public event NodeConnectStartEventHandler NodeConnectStart
+        {
+            add { AddHandler(NodeConnectStartEvent, value); }
+            remove { RemoveHandler (NodeConnectStartEvent, value); }
+        }
+        private void OnNodeConnectStart(ConnectStartEventArgs args)
+        {
+            ConnectionEndpoint endpoint = new ConnectionEndpoint(this, args.From);
+            NodeConnectStartEventArgs e = new(NodeConnectStartEvent, endpoint);
+            RaiseEvent(e);
+        }
         #endregion
 
+        #region Connector Event
+
+        public static readonly RoutedEvent ConnectEvent = NodeConnector.ConnectEvent.AddOwner(typeof(NodeContainer));
+
+        public event ConnectEventHandler Connect
+        {
+            add { AddHandler(ConnectEvent, value); }
+            remove { RemoveHandler(ConnectEvent, value); }
+        }
+
+        public static readonly RoutedEvent ConnectStartEvent = NodeConnector.ConnectStartEvent.AddOwner(typeof(NodeContainer));
+
+        public event ConnectStartEventHandler ConnectStart
+        {
+            add { AddHandler(ConnectStartEvent, value); }
+            remove { RemoveHandler(ConnectStartEvent, value); }
+        }
+
+        #endregion
         #endregion
 
         #region Events
 
-        public PositionChangedEventHandler? PositionChangedEventHandler { get; set; }
+        public event PositionChangedEventHandler? PositionChangedEventHandler;
 
         #endregion
 
@@ -263,9 +306,22 @@ namespace NodePro.Core.Node
 
             MoveCommand = new(ExecuteMoveCommand);
             HeaderClickedCommand = new(ExecuteHeaderClickedCommand);
+            Connect += ExecuteConnect;
+            ConnectStart += ExecuteConnectStart;
         }
 
         #endregion
+
+        private void ExecuteConnect(object sender, ConnectEventArgs e)
+        {
+            OnNodeConnect(e);
+        }
+
+        private void ExecuteConnectStart(object sender, ConnectStartEventArgs e)
+        {
+            OnNodeConnectStart(e);
+        }
+
 
         private DataTemplate? OnTemplateSelected(NodeElement element, DependencyObject container)
         {
@@ -289,17 +345,6 @@ namespace NodePro.Core.Node
             OnClicked();
         }
 
-        private static void ExecuteInputConnectCommand(ConnectEventArgs args)
-        {
-            NodeContainer container = args.TargetConnector.NodeParent;
-            if (container == null) return;
-            container.OnNodeConnect(args);
-        }
-
-        private static void ExecuteOutputConnectCommand(ConnectEventArgs args)
-        {
-            Debug.WriteLine("Output Accepted");
-        }
         private void ExecuteMoveCommand(DragDeltaEventArgs args)
         {
             this.OnMove(args);

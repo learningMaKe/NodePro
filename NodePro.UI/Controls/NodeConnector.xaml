@@ -27,19 +27,7 @@
             Background="{TemplateBinding Background}"
             BorderBrush="{TemplateBinding BorderBrush}"
             BorderThickness="{TemplateBinding BorderThickness}"
-            CornerRadius="{Binding RelativeSource={RelativeSource AncestorType=node:NodeConnector}, Path=ConnectorSize, Converter={StaticResource DoubleToRadiusConverter}}">
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="Drop">
-                    <i:InvokeCommandAction Command="{x:Static node:NodeConnector.DropCommand}" PassEventArgsToCommand="True" />
-                </i:EventTrigger>
-                <i:EventTrigger EventName="PreviewMouseLeftButtonDown">
-                    <i:InvokeCommandAction Command="{x:Static node:NodeConnector.DropStartCommand}" PassEventArgsToCommand="True" />
-                </i:EventTrigger>
-                <i:EventTrigger EventName="PreviewMouseMove">
-                    <i:InvokeCommandAction Command="{x:Static node:NodeConnector.DropMoveCommand}" PassEventArgsToCommand="True" />
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-        </Border>
+            CornerRadius="{Binding RelativeSource={RelativeSource AncestorType=node:NodeConnector}, Path=ConnectorSize, Converter={StaticResource DoubleToRadiusConverter}}" />
     </ControlTemplate>
 
     <Style x:Key="DefaultNodeConnector" TargetType="{x:Type node:NodeConnector}">

@@ -33,11 +33,6 @@
                             VerticalAlignment="Center"
                             ConnectorType="Input"
                             NodeParent="{Binding RelativeSource={RelativeSource AncestorType=core:NodeContainer}}">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="Connect">
-                                    <i:InvokeCommandAction Command="{x:Static core:NodeContainer.InputConnectCommand}" PassEventArgsToCommand="True" />
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
                             <core:NodeConnector.RenderTransform>
                                 <TranslateTransform X="{Binding ElementName=LeftConnector, Path=ActualWidth, Converter={StaticResource InverseDivide2Converter}}" />
                             </core:NodeConnector.RenderTransform>
@@ -56,12 +51,6 @@
                             VerticalAlignment="Center"
                             ConnectorType="Output"
                             NodeParent="{Binding RelativeSource={RelativeSource AncestorType=core:NodeContainer}}">
-
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="Connect">
-                                    <i:InvokeCommandAction Command="{x:Static core:NodeContainer.OutputConnectCommand}" PassEventArgsToCommand="True" />
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
                             <core:NodeConnector.RenderTransform>
                                 <TranslateTransform X="{Binding ElementName=RightConnector, Path=ActualWidth, Converter={StaticResource Divide2Converter}}" />
                             </core:NodeConnector.RenderTransform>

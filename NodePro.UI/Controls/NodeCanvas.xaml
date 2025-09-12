@@ -1,0 +1,8 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:node="clr-namespace:NodePro.Core.Node;assembly=NodePro.Core">
+    <Style x:Key="DefaultNodeCanvas" TargetType="{x:Type node:NodeCanvas}">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+</ResourceDictionary>

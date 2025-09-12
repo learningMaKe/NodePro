@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodePro.Core.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,13 +12,12 @@ namespace NodePro.Core.Node
 {
     public class NodeLine:Control
     {
-        private readonly NodeConnectEventArgs? _args;
         private LineCalculateMode _mode = LineCalculateMode.Straight;
         private INodeLineCalculator? _lineCalculator;
 
-        public ConnectionEndpoint Source {  get; private set; }
+        public INotifyPosition? Source {  get; private set; }
 
-        public ConnectionEndpoint Target { get; private set; }
+        public INotifyPosition? Target { get; private set; }
 
         public LineCalculateMode Mode
         {
@@ -42,29 +42,24 @@ namespace NodePro.Core.Node
             DependencyProperty.Register("Data", typeof(PathGeometry), typeof(NodeLine), new PropertyMetadata(null));
 
 
-
-
-        public NodeLine(NodeConnectEventArgs args)
+        public NodeLine(NodeConnectEventArgs args) : this(args.NodeSource.Connector, args.NodeTarget.Connector)
         {
-            _args = args;
+
+        }
+
+        public NodeLine(INotifyPosition source,INotifyPosition target)
+        {
+            Source = source;
+            Target = target;
             _lineCalculator = LineCalculatorFactory.GetCalculator(_mode);
             Data = new PathGeometry();
-            Source = args.NodeSource;
-            Target = args.NodeTarget;
-
-            // Source.Node.Move += OnNodeMove;
-            // Target.Node.Move += OnNodeMove;
-            WeakEventManager<NodeContainer, MoveEventArgs>.AddHandler(Source.Node, "Move", OnNodeMove);
-            WeakEventManager<NodeContainer, MoveEventArgs>.AddHandler(Target.Node, "Move", OnNodeMove);
+            Canvas.SetZIndex(this, -100);
+            WeakEventManager<INotifyPosition, PositionChangedEventArgs>.AddHandler(Source, nameof(INotifyPosition.PositionChangedEventHandler), OnNodeMove);
+            WeakEventManager<INotifyPosition, PositionChangedEventArgs>.AddHandler(Target, nameof(INotifyPosition.PositionChangedEventHandler), OnNodeMove);
             Recalculate();
         }
 
-        public NodeLine(Point source,Point target)
-        {
-
-        }
-
-        private void OnNodeMove(object? container, MoveEventArgs args)
+        private void OnNodeMove(object? notifier, PositionChangedEventArgs args)
         {
             Recalculate();
         }
@@ -79,7 +74,7 @@ namespace NodePro.Core.Node
         {
             Data.Clear();
             if (_lineCalculator is null) return;
-            PathFigure figure = _lineCalculator.Calculate(Source.Connector.Position, Target.Connector.Position);
+            PathFigure figure = _lineCalculator.Calculate(Source!.Position, Target!.Position);
             Data.Figures.Add(figure);
 
         }

@@ -23,11 +23,11 @@ namespace NodePro.Modules.Display.ViewModels
 
         #region Public Method
 
-        private readonly DelegateCommand<Canvas>? _canvasLoadedCommand = null;
-        public DelegateCommand<Canvas> CanvasLoadedCommand =>
-            _canvasLoadedCommand ?? new DelegateCommand<Canvas>(ExecuteCanvasLoadedCommand);
+        private readonly DelegateCommand<NodeCanvas>? _canvasLoadedCommand = null;
+        public DelegateCommand<NodeCanvas> CanvasLoadedCommand =>
+            _canvasLoadedCommand ?? new DelegateCommand<NodeCanvas>(ExecuteCanvasLoadedCommand);
 
-        void ExecuteCanvasLoadedCommand(Canvas parameter)
+        void ExecuteCanvasLoadedCommand(NodeCanvas parameter)
         {
             _drawer ??= new NodeDrawer(_containerProvider, parameter);
 

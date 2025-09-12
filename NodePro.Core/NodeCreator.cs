@@ -1,5 +1,6 @@
 ﻿using NodePro.Core.Attrs;
 using NodePro.Core.Exceptions;
+using NodePro.Core.Interfaces;
 using NodePro.Core.Model;
 using NodePro.Core.Node;
 using Prism.Ioc;
@@ -17,8 +18,6 @@ namespace NodePro.Core
     public class NodeInitArgs : EventArgs
     {
         public Point Position { get; init; } = new Point();
-
-        public NodeConnectEventHandler? NodeConnect;
 
     }
 
@@ -53,7 +52,7 @@ namespace NodePro.Core
             {
                 if (!_provider.IsRegistered<TSheet>())
                 {
-                    throw new InvalidOperationException($"未注册的节点类型:{typeof(TSheet).FullName}");
+                    NodeMissingException.Throw<TSheet>();
                 }
                 sheet ??= _provider.Resolve<TSheet>();
             }
@@ -84,21 +83,9 @@ namespace NodePro.Core
                 Elements = group,
             };
             
-            if(args.NodeConnect is not null)
-            {
-                container.NodeConnect += args.NodeConnect;
-            }
             return container;
         }
 
-        public NodeLine CreateLine(NodeConnectEventArgs args)
-        {
-            NodeLine line = new NodeLine(args)
-            {
-
-            };
-            return line;
-        }
 
     }
 }

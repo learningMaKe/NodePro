@@ -26,7 +26,7 @@
             Click="OnClick"
             Content="点击我"
             PreviewMouseLeftButtonDown="OnMouseDown" />
-        <Canvas x:Name="NodeCanvas">
+        <node:NodeCanvas x:Name="NodeCanvas">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="Loaded">
                     <i:InvokeCommandAction Command="{Binding CanvasLoadedCommand}" CommandParameter="{Binding ElementName=NodeCanvas}" />
@@ -43,7 +43,7 @@
                 <model:NodeElement Content="测试呀" />
                 <model:NodeElement Content="测测你的" />
             </node:NodeContainer>
-        </Canvas>
+        </node:NodeCanvas>
 
     </Grid>
 </UserControl>
