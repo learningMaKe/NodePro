@@ -8,10 +8,12 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:model="clr-namespace:NodePro.Core.Model;assembly=NodePro.Core"
     xmlns:node="clr-namespace:NodePro.Core.Node;assembly=NodePro.Core"
+    xmlns:prism="http://prismlibrary.com/"
     xmlns:viewmodels="clr-namespace:NodePro.Modules.Display.ViewModels"
     d:DataContext="{d:DesignInstance Type=viewmodels:DisplayViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
     <Grid>
         <i:Interaction.Triggers>
@@ -20,12 +22,6 @@
             </i:EventTrigger>
         </i:Interaction.Triggers>
 
-        <Button
-            HorizontalAlignment="Center"
-            VerticalAlignment="Top"
-            Click="OnClick"
-            Content="点击我"
-            PreviewMouseLeftButtonDown="OnMouseDown" />
         <node:NodeCanvas x:Name="NodeCanvas">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="Loaded">
@@ -45,5 +41,15 @@
             </node:NodeContainer>
         </node:NodeCanvas>
 
+        <Button
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"
+            Content="点击我">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Click">
+                    <i:InvokeCommandAction Command="{Binding ClickedCommand}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </Button>
     </Grid>
 </UserControl>

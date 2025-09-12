@@ -20,6 +20,7 @@ namespace NodePro.Modules.Display.ViewModels
         private INodeService _nodeService;
 
         public DelegateCommand<NodeConnectEventArgs> ConnectCommand { get; }
+        public DelegateCommand ClickedCommand { get; }
 
         #region Public Method
 
@@ -42,6 +43,12 @@ namespace NodePro.Modules.Display.ViewModels
         {
             _nodeService = containerProvider.Resolve<INodeService>();
             ConnectCommand = new(ExecuteConnectCommand);
+            ClickedCommand = new(ExecuteClickedCommand);
+        }
+
+        private void ExecuteClickedCommand()
+        {
+            _drawer!.LineMode = _drawer.LineMode == LineCalculateMode.Straight ? LineCalculateMode.Curved : LineCalculateMode.Straight;
         }
 
         private void ExecuteConnectCommand(NodeConnectEventArgs args)

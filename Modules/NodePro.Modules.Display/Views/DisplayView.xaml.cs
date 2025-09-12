@@ -32,7 +32,7 @@ namespace NodePro.Modules.Display.Views
 
         private void OnClick(object sender, RoutedEventArgs e)
         {
-
+            
         }
 
         private void OnMouseDown(object sender, MouseButtonEventArgs e)

@@ -134,7 +134,7 @@ namespace NodePro.Core.Node
             remove => RemoveHandler(ConnectStartEvent, value);
         }
         
-        private void OnConnectStart()
+        public void OnConnectStart()
         {
             var args = new ConnectStartEventArgs(ConnectStartEvent, this);
             RaiseEvent(args);

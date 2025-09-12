@@ -41,12 +41,6 @@ namespace NodePro.Core.Node
         public static readonly DependencyProperty DataProperty =
             DependencyProperty.Register("Data", typeof(PathGeometry), typeof(NodeLine), new PropertyMetadata(null));
 
-
-        public NodeLine(NodeConnectEventArgs args) : this(args.NodeSource.Connector, args.NodeTarget.Connector)
-        {
-
-        }
-
         public NodeLine(INotifyPosition source,INotifyPosition target)
         {
             Source = source;

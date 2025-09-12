@@ -1,4 +1,5 @@
-﻿using NodePro.Core.Interfaces;
+﻿using NodePro.Core.Exceptions;
+using NodePro.Core.Interfaces;
 using NodePro.Core.Model;
 using NodePro.Core.Node;
 using System;
@@ -13,16 +14,54 @@ using System.Windows.Input;
 
 namespace NodePro.Core
 {
+    public struct LinePair
+    {
+        public ConnectionEndpoint Source { get; set; }
+
+        public ConnectionEndpoint Target { get; set; }
+
+        public NodeLine Line { get; set; }
+
+        public LinePair(ConnectionEndpoint source,ConnectionEndpoint target,NodeLine line)
+        {
+            Source = source;
+            Target = target;
+            Line = line;
+        }
+
+        public LinePair(NodeConnectEventArgs args,NodeLine line)
+        {
+            Source = args.NodeSource;
+            Target = args.NodeTarget;
+            Line = line;
+        }
+    }
+
     public class NodeDrawer
     {
         private readonly IContainerProvider _containerProvider;
         private readonly NodeCreator _creator;
+        private readonly NodeLineCreator _lineCreator;
         private readonly NodeCanvas _canvas;
 
+        private readonly List<LinePair> _linePairs = [];
+
+        private LineCalculateMode _lineMode = LineCalculateMode.Straight;
+        public LineCalculateMode LineMode
+        {
+            get => _lineMode;
+            set 
+            { 
+                _lineMode = value;
+                _lineCreator.LineMode = value;
+                OnLineModeChanged();
+            }
+        }
         public NodeDrawer(IContainerProvider containerProvider, NodeCanvas canvas)
         {
             _containerProvider = containerProvider;
             _creator = containerProvider.Resolve<NodeCreator>();
+            _lineCreator = containerProvider.Resolve<NodeLineCreator>();
             _canvas = canvas;
             InitCanvas();
         }
@@ -43,7 +82,7 @@ namespace NodePro.Core
 
         public NodeLine DrawConnect(NodeConnectEventArgs args)
         {
-            NodeLine line = new(args);
+            NodeLine line = _lineCreator.CreateLine(args);
             AddToCanvas(line);
             return line;
         }
@@ -96,13 +135,45 @@ namespace NodePro.Core
         private void OnNodeConnect(object sender, NodeConnectEventArgs args)
         {
             NodeLine line = DrawConnect(args);
-
+            LinePair pair = new LinePair(args, line);
+            _linePairs.Add(pair);
         }
 
         private void OnNodeConnectStart(object sender, NodeConnectStartEventArgs args)
         {
-            _connectStartArgs = args;
-            StartTrack(args.StartFrom.Connector);
+            void DoConnectFrom(NodeConnector connector)
+            {
+                _connectStartArgs = args;
+                StartTrack(connector);
+            }
+            ConnectorType type = args.StartFrom.Connector.ConnectorType;
+            // 输出点支持多次向外连线
+            if (type == ConnectorType.Output)
+            {
+                DoConnectFrom(args.StartFrom.Connector);
+                return;
+            }
+            // 输入点仅支持一次连线
+            LinePair[] pairs = _linePairs.Where(x => x.Source.Connector == args.StartFrom.Connector || x.Target.Connector == args.StartFrom.Connector).ToArray();
+            // 如果当前没有连线直接允许
+            if (pairs.Length <= 0)
+            {
+                DoConnectFrom(args.StartFrom.Connector);
+                return;
+            }
+            // 取第一个，多余一个都是意外情况
+            if (pairs.Length > 1) 
+            {
+                throw new NodeConnectException(ConnectionErrorCode.输入点多条连线);
+            }
+            LinePair pair = pairs.FirstOrDefault();
+            NodeConnector start = pair.Source.Connector;
+            _linePairs.Remove(pair);
+            RemoveFromCanvas(pair.Line);
+            // 不能使用DoConnectFrom,因为这里调整了流向，args.StartFrom来自输入点，但start来自输出点，流向有问题，要重开一个NodeConnect事件
+            start.OnConnectStart();
+
+
         }
 
         #region Track Method
@@ -128,7 +199,7 @@ namespace NodePro.Core
         {
             if (_tracker == null) return;
             _tracker.Position = Mouse.GetPosition(_canvas);
-            _trackLine = new(notify, _tracker);
+            _trackLine = _lineCreator.CreateLine(notify, _tracker);
             AddToCanvas(_trackLine);
             _tracking = true;
         }
@@ -143,6 +214,25 @@ namespace NodePro.Core
 
         #endregion
 
+        private List<T> GetCanvasTypes<T>() where T :UIElement
+        {
+            List<T> elements = [];
+            foreach (var element in _canvas.Children) 
+            {
+                if (element.GetType() != typeof(T)) continue;
+                elements.Add((T)element);
+            }
+            return elements;
+        }
+
+        private void OnLineModeChanged()
+        {
+            List<NodeLine> lines = GetCanvasTypes<NodeLine>();
+            foreach (var line in lines)
+            {
+                line.Mode = LineMode;
+            }
+        }
         #endregion
     }
 }
