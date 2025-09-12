@@ -44,9 +44,9 @@ namespace NodePro.Core
         {
             if (!_reflectionMap.TryGetValue(mode, out Type? calculateType))
             {
-                throw new InvalidOperationException($"{mode} map not fou");
+                throw new InvalidOperationException($"{mode} map not found");
             }
-            INodeLineCalculator nodeLineCalculator = Activator.CreateInstance(calculateType) as INodeLineCalculator ?? throw new InvalidOperationException($"无法创建{calculateType.FullName}的无参示例");
+            INodeLineCalculator nodeLineCalculator = Activator.CreateInstance(calculateType) as INodeLineCalculator ?? throw new InvalidOperationException($"无法创建{calculateType.FullName}的无参实例");
             return nodeLineCalculator;
         }
         /// <summary>

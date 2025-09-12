@@ -87,7 +87,11 @@ namespace NodePro.Core
             return line;
         }
 
-
+        public void ExecuteFrom(NodeContainer node)
+        {
+            NodeData data = new NodeData();
+            
+        }
 
         public void AddToCanvas(UIElement element)
         {
@@ -99,6 +103,7 @@ namespace NodePro.Core
             if (element is null) return;
             _canvas.Children.Remove(element);
         }
+
         #endregion
 
         #region Private Methods

@@ -312,6 +312,10 @@ namespace NodePro.Core.Node
 
         #endregion
 
+        public NodeData Execute(NodeData data)
+        {
+            return data;
+        }
         private void ExecuteConnect(object sender, ConnectEventArgs e)
         {
             OnNodeConnect(e);
