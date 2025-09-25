@@ -1,16 +1,13 @@
-﻿using NodePro.Core.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using NodePro.Abstractions;
+using NodePro.Abstractions.Enums;
+using NodePro.Abstractions.Interfaces;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace NodePro.Core.Node
 {
-    public class NodeLine:Control
+    public class NodeLine:NodeLineBase
     {
         private LineCalculateMode _mode = LineCalculateMode.Straight;
         private INodeLineCalculator? _lineCalculator;

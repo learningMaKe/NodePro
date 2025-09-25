@@ -1,10 +1,7 @@
-﻿using NodePro.Core.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using NodePro.Abstractions;
+using NodePro.Abstractions.Arguments;
+using NodePro.Abstractions.Enums;
+using NodePro.Abstractions.Interfaces;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -14,38 +11,11 @@ using System.Windows.Shapes;
 
 namespace NodePro.Core.Node
 {
-    public enum ConnectorType
-    {
-        Input,
-        Output
-    }
-
-    public class ConnectEventArgs : RoutedEventArgs
-    {
-        public NodeConnector SourceConnector { get; }
-        public NodeConnector TargetConnector { get; }
-        public ConnectEventArgs(RoutedEvent routedEvent, NodeConnector source, NodeConnector target) : base(routedEvent)
-        {
-            SourceConnector = source;
-            TargetConnector = target;
-        }
-    }
-
-    public class ConnectStartEventArgs:RoutedEventArgs
-    {
-        public NodeConnector From { get; private set; }
-        public ConnectStartEventArgs(RoutedEvent routed, NodeConnector from):base(routed)
-        {
-            From = from;
-        }
-
-    }
-
     public delegate void ConnectEventHandler(object sender, ConnectEventArgs e);
 
     public delegate void ConnectStartEventHandler(object sender, ConnectStartEventArgs e);
 
-    public class NodeConnector : Control,INotifyPosition
+    public class NodeConnector : NodeConnectorBase
     {
         #region Properties
 
@@ -58,7 +28,7 @@ namespace NodePro.Core.Node
         #endregion
 
         #region Dependency Properties
-        public ConnectorType ConnectorType
+        public override ConnectorType ConnectorType
         {
             get { return (ConnectorType)GetValue(ConnectorTypeProperty); }
             set { SetValue(ConnectorTypeProperty, value); }
@@ -80,15 +50,15 @@ namespace NodePro.Core.Node
 
 
 
-        public NodeContainer NodeParent
+        public override NodeContainerBase NodeParent
         {
-            get { return (NodeContainer)GetValue(NodeParentProperty); }
+            get { return (NodeContainerBase)GetValue(NodeParentProperty); }
             set { SetValue(NodeParentProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for NodeParent.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty NodeParentProperty =
-            DependencyProperty.Register("NodeParent", typeof(NodeContainer), typeof(NodeConnector), new PropertyMetadata(null));
+            DependencyProperty.Register("NodeParent", typeof(NodeContainerBase), typeof(NodeConnector), new PropertyMetadata(null));
 
 
 
@@ -134,7 +104,7 @@ namespace NodePro.Core.Node
             remove => RemoveHandler(ConnectStartEvent, value);
         }
         
-        public void OnConnectStart()
+        public override void OnConnectStart()
         {
             var args = new ConnectStartEventArgs(ConnectStartEvent, this);
             RaiseEvent(args);
@@ -226,7 +196,7 @@ namespace NodePro.Core.Node
         }
 
         #endregion
-        public Point Position
+        public override Point Position
         {
             get
             {
@@ -237,9 +207,10 @@ namespace NodePro.Core.Node
                 Point parentPos = NodeParent.Position;
                 return new Point(parentPos.X + newPos.X + this.ActualWidth / 2, parentPos.Y + newPos.Y + this.ActualHeight / 2);
             }
+            set => throw new InvalidOperationException();
         }
 
-        public event PositionChangedEventHandler? PositionChangedEventHandler;
+        public override event PositionChangedEventHandler? PositionChangedEventHandler;
 
         private void OnConnectorLoaded(object sender, RoutedEventArgs e)
         {

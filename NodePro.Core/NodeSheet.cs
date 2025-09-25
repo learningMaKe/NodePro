@@ -1,8 +1,6 @@
-﻿using NodePro.Core.Attrs;
-using NodePro.Core.Model;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using NodePro.Abstractions.Attrs;
+using NodePro.Abstractions.Interfaces;
+using NodePro.Abstractions.Models;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -11,18 +9,8 @@ using System.Threading.Tasks;
 
 namespace NodePro.Core
 {
-    public class NodeProperty()
-    {
-        public required PropertyInfo Property { get; init; }
 
-        public required NodePropertyAttribute NodePropertyAttribute { get; init; }
-
-        public NodeOrderAttribute? NodeOrderAttribute { get; init; }
-
-        
-    }
-
-    public abstract class NodeSheet
+    public abstract class NodeSheet:INodeSheet
     {
 
         protected IContainerProvider _containerProvider;

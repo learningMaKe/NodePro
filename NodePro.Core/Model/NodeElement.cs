@@ -1,6 +1,6 @@
-﻿using NodePro.Core.Attrs;
-using System;
-using System.Collections.Generic;
+﻿using NodePro.Abstractions.Constants;
+using NodePro.Abstractions.Enums;
+using NodePro.Abstractions.Interfaces;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
@@ -10,12 +10,6 @@ using System.Threading.Tasks;
 
 namespace NodePro.Core.Model
 {
-    public enum NodeMode
-    {
-        Input,
-        Output
-    }
-
     public class NodeElementGroup : ObservableCollection<NodeElement>
     {
         public NodeElementGroup(params NodeElement[] elements)
@@ -49,7 +43,7 @@ namespace NodePro.Core.Model
 
     public class NodeElement:BindableBase
     {
-        public required NodeSheet Sheet { get; set; }
+        public required INodeSheet Sheet { get; set; }
 
         public required PropertyInfo Prop { get; init; }
 
@@ -67,7 +61,7 @@ namespace NodePro.Core.Model
             }
         }
 
-        private string _template = TemplateKey.DefaultNodeTemplate;
+        private string _template = NodeTemplateKey.DefaultNodeTemplate;
 
 
         public string Template

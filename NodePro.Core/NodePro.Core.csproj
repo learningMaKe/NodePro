@@ -12,4 +12,8 @@
     <PackageReference Include="System.Composition" Version="9.0.9" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NodePro.Abstractions\NodePro.Abstractions.csproj" />
+  </ItemGroup>
+
 </Project>

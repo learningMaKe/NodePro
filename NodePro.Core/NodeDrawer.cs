@@ -1,41 +1,17 @@
-﻿using NodePro.Core.Exceptions;
-using NodePro.Core.Interfaces;
-using NodePro.Core.Model;
+﻿using NodePro.Abstractions;
+using NodePro.Abstractions.Arguments;
+using NodePro.Abstractions.Enums;
+using NodePro.Abstractions.Exceptions;
+using NodePro.Abstractions.Interfaces;
+using NodePro.Abstractions.Models;
 using NodePro.Core.Node;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace NodePro.Core
 {
-    public struct LinePair
-    {
-        public ConnectionEndpoint Source { get; set; }
-
-        public ConnectionEndpoint Target { get; set; }
-
-        public NodeLine Line { get; set; }
-
-        public LinePair(ConnectionEndpoint source,ConnectionEndpoint target,NodeLine line)
-        {
-            Source = source;
-            Target = target;
-            Line = line;
-        }
-
-        public LinePair(NodeConnectEventArgs args,NodeLine line)
-        {
-            Source = args.NodeSource;
-            Target = args.NodeTarget;
-            Line = line;
-        }
-    }
+    
 
     public class NodeDrawer
     {
@@ -108,6 +84,10 @@ namespace NodePro.Core
 
         #region Private Methods
 
+        private void CreateExecutionGroup()
+        {
+
+        }
         private void InitCanvas()
         {
             _canvas.NodeConnect += OnNodeConnect;
@@ -146,7 +126,7 @@ namespace NodePro.Core
 
         private void OnNodeConnectStart(object sender, NodeConnectStartEventArgs args)
         {
-            void DoConnectFrom(NodeConnector connector)
+            void DoConnectFrom(INodeConnector connector)
             {
                 _connectStartArgs = args;
                 StartTrack(connector);
@@ -172,7 +152,7 @@ namespace NodePro.Core
                 throw new NodeConnectException(ConnectionErrorCode.输入点多条连线);
             }
             LinePair pair = pairs.FirstOrDefault();
-            NodeConnector start = pair.Source.Connector;
+            NodeConnectorBase start = pair.Source.Connector;
             _linePairs.Remove(pair);
             RemoveFromCanvas(pair.Line);
             // 不能使用DoConnectFrom,因为这里调整了流向，args.StartFrom来自输入点，但start来自输出点，流向有问题，要重开一个NodeConnect事件

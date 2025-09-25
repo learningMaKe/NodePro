@@ -1,15 +1,9 @@
-﻿using NodePro.Core.Attrs;
-using NodePro.Core.Exceptions;
-using NodePro.Core.Interfaces;
+﻿using NodePro.Abstractions.Attrs;
+using NodePro.Abstractions.Exceptions;
+using NodePro.Abstractions.Interfaces;
+using NodePro.Abstractions.Models;
 using NodePro.Core.Model;
 using NodePro.Core.Node;
-using Prism.Ioc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace NodePro.Core
@@ -31,7 +25,7 @@ namespace NodePro.Core
             _provider = provider;
         }
 
-        public static NodeElement CreateElement(NodeSheet sheet,NodeProperty property)
+        public static NodeElement CreateElement(INodeSheet sheet,NodeProperty property)
         {
             var element = new NodeElement()
             {
@@ -46,7 +40,7 @@ namespace NodePro.Core
             return element;
         }
 
-        public NodeElementGroup CreateElementGroup<TSheet>(TSheet? sheet = null) where TSheet : NodeSheet
+        public NodeElementGroup CreateElementGroup<TSheet>(TSheet? sheet = null) where TSheet : class, INodeSheet
         {
             if (sheet is null)
             {

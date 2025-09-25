@@ -1,5 +1,7 @@
-﻿using NodePro.Core.Attrs;
-using NodePro.Core.Interfaces;
+﻿using NodePro.Abstractions.Arguments;
+using NodePro.Abstractions.Attrs;
+using NodePro.Abstractions.Enums;
+using NodePro.Abstractions.Interfaces;
 using NodePro.Core.Node;
 using System;
 using System.Collections.Generic;

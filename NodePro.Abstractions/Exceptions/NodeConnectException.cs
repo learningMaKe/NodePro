@@ -1,15 +1,12 @@
-﻿using System;
+﻿using NodePro.Abstractions.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NodePro.Core.Exceptions
+namespace NodePro.Abstractions.Exceptions
 {
-    public enum ConnectionErrorCode
-    {
-        输入点多条连线,
-    }
     public class NodeConnectException:Exception
     {
         public ConnectionErrorCode ConnectionErrorCode;

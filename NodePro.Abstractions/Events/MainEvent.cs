@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NodePro.Core.Events
+namespace NodePro.Abstractions.Events
 {
     public class ChangePriceEvent : PubSubEvent { };
 
@@ -63,4 +63,5 @@ namespace NodePro.Core.Events
     public class ClosingEvent : PubSubEvent<CloseEventRegister> { }
 
     #endregion
+
 }

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace NodePro.Core.Interfaces
+namespace NodePro.Abstractions.Interfaces
 {
     public class PositionChangedEventArgs : EventArgs
     {
@@ -16,10 +16,11 @@ namespace NodePro.Core.Interfaces
     }
 
     public delegate void PositionChangedEventHandler(object notifier, PositionChangedEventArgs args);
+
     public interface INotifyPosition
     {
         public event PositionChangedEventHandler? PositionChangedEventHandler;
 
-        public Point Position { get; }
+        public Point Position { get; set; }
     }
 }

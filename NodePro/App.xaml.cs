@@ -1,6 +1,5 @@
 ﻿using NodePro.Core;
-using NodePro.Core.Attrs;
-using NodePro.Core.Model;
+using NodePro.Core.Extensions;
 using NodePro.Services;
 using NodePro.Services.Interfaces;
 using NodePro.ViewModels;
@@ -27,15 +26,9 @@ namespace NodePro
         {
             containerRegistry.RegisterSingleton<IContentDialogService, ContentDialogService>();
             containerRegistry.RegisterSingleton<INodeService, NodeService>();
-            NodeRegister register = NodeConstants.DefaultRegister;
-            foreach(var serviceType in register.GetScannedTypes(NodeRegisterKey.Services))
-            {
-                containerRegistry.RegisterSingleton(serviceType);
-            }
-            foreach(var nodeType in register.GetScannedTypes(NodeRegisterKey.Nodes))
-            { 
-                containerRegistry.Register(nodeType);
-            }
+            NodeRegister register = NodeRegisters.DefaultRegister;
+            register.PrismIoc(containerRegistry);
+            containerRegistry.RegisterInstance(register);
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)

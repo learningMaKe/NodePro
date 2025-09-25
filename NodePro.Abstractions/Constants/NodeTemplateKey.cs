@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NodePro.Core
+namespace NodePro.Abstractions.Constants
 {
-    public class TemplateKey
+    public class NodeTemplateKey
     {
         public const string DefaultOutputTemplate = "DefaultOutputTemplate";
 

@@ -4,15 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NodePro.Core.Attrs
+namespace NodePro.Abstractions.Attrs
 {
     [AttributeUsage(AttributeTargets.Field)]
     public class NodeLineAttribute:Attribute
     {
-        public Type CalculatorType { get; set; }
-        public NodeLineAttribute(Type calculateType)
+        public string Key = string.Empty;
+
+        public NodeLineAttribute(string key)
         {
-            CalculatorType = calculateType;
+            Key = key;
         }
     }
 }

@@ -1,11 +1,9 @@
-﻿using NodePro.Core.Interfaces;
+﻿using NodePro.Abstractions;
+using NodePro.Abstractions.Arguments;
+using NodePro.Abstractions.Constants;
+using NodePro.Abstractions.Interfaces;
+using NodePro.Abstractions.Models;
 using NodePro.Core.Model;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -15,34 +13,11 @@ using System.Windows.Media;
 
 namespace NodePro.Core.Node
 {
-    // 代表连接的一方（节点+连接器）
-    public readonly struct ConnectionEndpoint(NodeContainer node, NodeConnector connector)
-    {
-        public NodeContainer Node { get; } = node ?? throw new ArgumentNullException(nameof(node));
-        public NodeConnector Connector { get; } = connector ?? throw new ArgumentNullException(nameof(connector));
-    }
-
-    public class NodeConnectEventArgs(RoutedEvent routedEvent, ConnectEventArgs args) : RoutedEventArgs(routedEvent)
-    {
-        public ConnectionEndpoint NodeSource { get; } = new ConnectionEndpoint(args.SourceConnector.NodeParent, args.SourceConnector);
-
-        public ConnectionEndpoint NodeTarget { get; } = new ConnectionEndpoint(args.TargetConnector.NodeParent, args.TargetConnector);
-    }
-
     public class MoveEventArgs(RoutedEvent routedEvent,NodeContainer container,DragDeltaEventArgs args) : RoutedEventArgs(routedEvent)
     {
         public NodeContainer Container { get; } = container ?? throw new ArgumentNullException(nameof(container));
 
         public DragDeltaEventArgs Args { get; } = args ?? throw new ArgumentNullException(nameof(args));
-    }
-
-    public class NodeConnectStartEventArgs : RoutedEventArgs
-    {
-        public ConnectionEndpoint StartFrom { get; init; }
-        public NodeConnectStartEventArgs(RoutedEvent routed, ConnectionEndpoint endpoint):base(routed)
-        {
-            StartFrom = endpoint;
-        }
     }
 
     public delegate void NodeConnectEventHandler(object sender, NodeConnectEventArgs args);
@@ -52,7 +27,7 @@ namespace NodePro.Core.Node
     public delegate void NodeConnectStartEventHandler(object sender, NodeConnectStartEventArgs args);
 
     [ContentProperty("Elements")]
-    public class NodeContainer:Expander,INotifyPosition
+    public class NodeContainer:NodeContainerBase
     {
 
         #region Fields
@@ -117,7 +92,7 @@ namespace NodePro.Core.Node
 
 
 
-        public Point Position
+        public override Point Position
         {
             get { return (Point)GetValue(PositionProperty); }
             set { SetValue(PositionProperty, value); }
@@ -293,7 +268,7 @@ namespace NodePro.Core.Node
 
         #region Events
 
-        public event PositionChangedEventHandler? PositionChangedEventHandler;
+        public override event PositionChangedEventHandler? PositionChangedEventHandler;
 
         #endregion
 
@@ -337,7 +312,7 @@ namespace NodePro.Core.Node
             {
                 return appTemplate;
             }
-            else if(this.TryFindResource(TemplateKey.DefaultNodeTemplate) is DataTemplate defaultTemplate)
+            else if(this.TryFindResource(NodeTemplateKey.DefaultNodeTemplate) is DataTemplate defaultTemplate)
             {
                 return defaultTemplate;
             }

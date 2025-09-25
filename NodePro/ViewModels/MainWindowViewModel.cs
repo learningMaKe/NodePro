@@ -1,10 +1,5 @@
-﻿using NodePro.Core.Events;
+﻿using NodePro.Abstractions.Events;
 using NodePro.Core.MVVM;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NodePro.ViewModels
 {

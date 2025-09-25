@@ -1,73 +1,36 @@
-﻿using NodePro.Core.Attrs;
-using Prism.Ioc;
-using System;
-using System.Collections.Generic;
-using System.Composition.Convention;
-using System.Composition.Hosting;
+﻿using NodePro.Abstractions;
+using NodePro.Abstractions.Attrs;
+using NodePro.Abstractions.Constants;
+using NodePro.Abstractions.Interfaces;
+using NodePro.Abstractions.Models;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Resolvers;
 using System.Xml.Serialization;
+using static NodePro.Abstractions.Constants.NodeRegisterConstants;
 
 namespace NodePro.Core
 {
-    public class NodeConfig
-    {
-
-        [XmlArray("DllGroup"),XmlArrayItem("Dll")]
-        public List<string> DllGroup = [];
-    }
-
-    public class NodeRegisterPath
-    {
-        public const string ConfigPath = "Config\\Node.Config";
-        public const string DllDirPath = "Dll\\";
-    }
-
-    public class NodeRegisterKey
-    {
-        public const string Services = "Services";
-        public const string Nodes = "Nodes";
-
-        public required string Key { get; set; }
-
-        public Action<Type>? Selected { get; set; }
-        public required Func<Type, bool> Filter { get; set; }
-
-        public NodeRegisterKey()
-        {
-                
-        }
-    }
-
     public class NodeRegister
     {
-
-        private readonly NodeConfig? _config;
+        private readonly NodeRegisterConfig? _config;
         private readonly Dictionary<string, HashSet<Type>> _scannedTypes = [];
         private readonly List<NodeRegisterKey> _registerKeys = [];
+        private readonly Dictionary<string, NodeRegisterParameters> _registerParameters = [];
 
 
-        public Assembly[] DllGroup { get; set; }
- 
+        public Assembly[] DllGroup { get; set; } = [];
         public NodeRegister(string path)
         {
             _config = LoadConfig(path);
             DllGroup = ReadConfig(_config);
         }
 
-        private NodeRegister(Assembly[] assemblies)
+        private NodeRegister(params Assembly[] assemblies)
         {
             DllGroup = assemblies;
         }
-
 
         public static NodeRegister Combine(params string[] paths)
         {
@@ -94,6 +57,12 @@ namespace NodePro.Core
             return this;
         }
 
+        public NodeRegisterParameters GetParameters(string key)
+        {
+            if(_registerParameters.TryGetValue(key, out var parameters)) return parameters;
+            return [];
+        }
+
         public NodeRegister Scan()
         {
             Type[] typesToScan = DllGroup.Select(x => x.GetTypes()).SelectMany(x => x).ToArray() ?? [];
@@ -101,6 +70,7 @@ namespace NodePro.Core
             foreach(var key in vaildKeys)
             {
                 _scannedTypes.TryAdd(key.Key, []);
+                _registerParameters.Add(key.Key, []);
             }
             foreach(var type in typesToScan)
             {
@@ -111,7 +81,8 @@ namespace NodePro.Core
                     var typeGroup = _scannedTypes.GetValueOrDefault(key.Key);
                     if (typeGroup == null) continue;
                     typeGroup.Add(type);
-                    key.Selected?.Invoke(type);
+
+                    key.Selected?.Invoke(type, _registerParameters[key.Key]);
                 }
             }
             _registerKeys.Clear();
@@ -119,37 +90,7 @@ namespace NodePro.Core
         }
 
 
-
-        private static string SerializeConfig(NodeConfig config)
-        {
-            if (config is null) return string.Empty;
-            var serializer = new XmlSerializer(typeof(NodeConfig));
-            using var sw = new StringWriter();
-            serializer.Serialize(sw, config);
-            return sw.ToString();
-        }
-
-        private static NodeConfig? DeserializeConfig(string xml)
-        {
-            if (string.IsNullOrEmpty(xml))
-                return null;
-
-            // 创建XmlSerializer实例
-            var serializer = new XmlSerializer(typeof(NodeConfig));
-
-            // 使用StringReader读取XML内容并反序列化
-            using var reader = new StringReader(xml);
-            return (NodeConfig?)serializer.Deserialize(reader);
-        }
-
-        private static bool IsValidAssembly(string path)
-        {
-            return !string.IsNullOrEmpty(path)
-                   && File.Exists(path)
-                   && string.Equals(Path.GetExtension(path), ".dll", StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static Assembly[] ReadConfig(NodeConfig config)
+        protected static Assembly[] ReadConfig(NodeRegisterConfig config)
         {
             // 验证配置和DLL列表
             if (config?.DllGroup == null || config.DllGroup.Count == 0)
@@ -189,10 +130,10 @@ namespace NodePro.Core
             return assemblies.ToArray();
         }
 
-        private static NodeConfig LoadConfig(string path)
+        protected static NodeRegisterConfig LoadConfig(string path)
         {
-            if(string.IsNullOrWhiteSpace(path)) return new NodeConfig();
-            NodeConfig? res = null;
+            if (string.IsNullOrWhiteSpace(path)) return new NodeRegisterConfig();
+            NodeRegisterConfig? res = null;
             if (File.Exists(path))
             {
                 res = LoadConfigByFile(path);
@@ -201,17 +142,17 @@ namespace NodePro.Core
             {
                 res = LoadConfigByDir(path);
             }
-            res ??= new NodeConfig();
+            res ??= new NodeRegisterConfig();
             return res;
         }
 
-        private static NodeConfig? LoadConfigByDir(string path) 
+        protected static NodeRegisterConfig? LoadConfigByDir(string path)
         {
             DirectoryInfo dir = new(path);
-            if(!dir.Exists) return null;
+            if (!dir.Exists) return null;
             List<string> files = [.. dir.GetFiles().Where(x => IsValidAssembly(x.Name)).Select(x => x.FullName)];
 
-            NodeConfig config = new()
+            NodeRegisterConfig config = new()
             {
                 DllGroup = files
             };
@@ -219,9 +160,9 @@ namespace NodePro.Core
             return config;
         }
 
-        private static NodeConfig? LoadConfigByFile(string path)
+        protected static NodeRegisterConfig? LoadConfigByFile(string path)
         {
-            NodeConfig? config = null;
+            NodeRegisterConfig? config = null;
             string? dir = Path.GetDirectoryName(path);
             if (string.IsNullOrWhiteSpace(dir))
             {
@@ -235,7 +176,7 @@ namespace NodePro.Core
             {
                 using FileStream fs = new(path, FileMode.Create);
                 using StreamWriter writer = new(fs);
-                config = new NodeConfig();
+                config = new NodeRegisterConfig();
                 string xml = SerializeConfig(config);
                 writer.Write(xml);
             }
@@ -248,10 +189,40 @@ namespace NodePro.Core
             return config;
         }
 
+        protected static string SerializeConfig(NodeRegisterConfig config)
+        {
+            if (config is null) return string.Empty;
+            var serializer = new XmlSerializer(typeof(NodeRegisterConfig));
+            using var sw = new StringWriter();
+            serializer.Serialize(sw, config);
+            return sw.ToString();
+        }
+
+        protected static NodeRegisterConfig? DeserializeConfig(string xml)
+        {
+            if (string.IsNullOrEmpty(xml))
+                return null;
+
+            // 创建XmlSerializer实例
+            var serializer = new XmlSerializer(typeof(NodeRegisterConfig));
+
+            // 使用StringReader读取XML内容并反序列化
+            using var reader = new StringReader(xml);
+            return (NodeRegisterConfig?)serializer.Deserialize(reader);
+        }
+
+        protected static bool IsValidAssembly(string path)
+        {
+            return !string.IsNullOrEmpty(path)
+                   && File.Exists(path)
+                   && string.Equals(Path.GetExtension(path), ".dll", StringComparison.OrdinalIgnoreCase);
+        }
+
     }
 
-    public static class NodeConstants
+    public static class NodeRegisters
     {
+
         private static readonly Lazy<NodeRegister> _defaultRegister = new Lazy<NodeRegister>(CreateDefaultRegister);
         public static NodeRegister DefaultRegister => _defaultRegister.Value;
 
@@ -259,26 +230,45 @@ namespace NodePro.Core
 
         public static NodeRegisterKey ScanNode { get; private set; }
 
-        static NodeConstants()
+        public static NodeRegisterKey ScanLine { get; private set; }
+
+        static NodeRegisters()
         {
             ScanService = new NodeRegisterKey()
             {
-                Key = NodeRegisterKey.Services,
+                Key = NodeRegisterConstants.Services,
                 Filter = x => x.GetCustomAttribute<NodeServiceAttribute>() != null
             };
+
             ScanNode = new NodeRegisterKey()
             {
-                Key = NodeRegisterKey.Nodes,
+                Key = NodeRegisterConstants.Nodes,
                 Filter = x => x.GetCustomAttribute<NodeAttribute>() != null
+            };
+
+            ScanLine = new NodeRegisterKey()
+            {
+                Key = NodeRegisterConstants.Lines,
+                Filter = x => x.GetCustomAttribute<NodeLineAttribute>() != null,
+                Selected = (type, parameter) =>
+                {
+                    var lineAttr = type.GetCustomAttribute<NodeLineAttribute>();
+                    parameter.Add(lineAttr!.Key, type);
+                }
             };
         }
 
         private static NodeRegister CreateDefaultRegister()
         {
-            NodeRegister register = NodeRegister.Combine(NodeRegisterPath.ConfigPath, NodeRegisterPath.DllDirPath);
-            register.AddKey(ScanNode).AddKey(ScanService).Scan();
+            NodeRegister register = NodeRegister.Combine(ConfigPath, DllDirPath);
+            register.
+                AddKey(ScanNode).
+                AddKey(ScanService).
+                AddKey(ScanLine).
+                Scan();
             return register;
-
         }
     }
+
+
 }

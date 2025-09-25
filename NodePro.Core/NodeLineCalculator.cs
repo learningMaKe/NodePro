@@ -1,11 +1,5 @@
-﻿using NodePro.Core.Attrs;
-using NodePro.Core.Lines;
-using NodePro.Core.Node;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using NodePro.Abstractions.Attrs;
+using NodePro.Abstractions.Enums;
 using System.Windows;
 using System.Windows.Media;
 
@@ -69,16 +63,7 @@ namespace NodePro.Core
         }
     }
 
-    public enum LineCalculateMode
-    {
-        [NodeLine(typeof(StraightLine))]
-        Straight,
-
-        [NodeLine(typeof(CurveLine))]
-        Curved,
-        // [NodeLine(typeof(AngledLineCalculator))]
-        // Angled
-    }
+    
 
     public interface INodeLineCalculator
     {

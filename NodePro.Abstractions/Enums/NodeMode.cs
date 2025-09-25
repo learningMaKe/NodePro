@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NodePro.Core.Attrs
+namespace NodePro.Abstractions.Enums
 {
-    [AttributeUsage(AttributeTargets.Class)]
-    public class NodeServiceAttribute:Attribute
+    public enum NodeMode
     {
-
+        Input,
+        Output,
     }
 }

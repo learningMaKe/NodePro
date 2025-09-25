@@ -1,13 +1,7 @@
-﻿using NodePro.Core.Model;
-using System;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using NodePro.Abstractions.Constants;
+using NodePro.Abstractions.Enums;
 
-namespace NodePro.Core.Attrs
+namespace NodePro.Abstractions.Attrs
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class NodePropertyAttribute : Attribute
@@ -26,14 +20,19 @@ namespace NodePro.Core.Attrs
         {
             Mode = NodeMode.Output;
             Format = format;
-            Template = TemplateKey.DefaultOutputTemplate;
+            Template = NodeTemplateKey.DefaultOutputTemplate;
         }
     }
 
     [AttributeUsage(AttributeTargets.Property)]
-    public class NodeOrderAttribute(int order) : Attribute
+    public class NodeOrderAttribute : Attribute
     {
-        public int Order { get; } = order;
+        public int Order { get; }
+
+        public NodeOrderAttribute(int order)
+        {
+            Order = order;
+        }
     }
 
 
