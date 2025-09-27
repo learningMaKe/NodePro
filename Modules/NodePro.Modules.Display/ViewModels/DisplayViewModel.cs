@@ -1,4 +1,5 @@
 ﻿using NodePro.Abstractions.Arguments;
+using NodePro.Abstractions.Constants;
 using NodePro.Abstractions.Enums;
 using NodePro.Core;
 using NodePro.Core.MVVM;
@@ -50,7 +51,7 @@ namespace NodePro.Modules.Display.ViewModels
 
         private void ExecuteClickedCommand()
         {
-            _drawer!.LineMode = _drawer.LineMode == LineCalculateMode.Straight ? LineCalculateMode.Curved : LineCalculateMode.Straight;
+            _drawer!.LineMode = _drawer.LineMode == NodeLineConstants.Curve ? NodeLineConstants.Straight: NodeLineConstants.Curve;
         }
 
         private void ExecuteConnectCommand(NodeConnectEventArgs args)

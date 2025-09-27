@@ -1,5 +1,6 @@
 ﻿using NodePro.Abstractions;
 using NodePro.Abstractions.Arguments;
+using NodePro.Abstractions.Constants;
 using NodePro.Abstractions.Enums;
 using NodePro.Abstractions.Exceptions;
 using NodePro.Abstractions.Interfaces;
@@ -22,8 +23,8 @@ namespace NodePro.Core
 
         private readonly List<LinePair> _linePairs = [];
 
-        private LineCalculateMode _lineMode = LineCalculateMode.Straight;
-        public LineCalculateMode LineMode
+        private string _lineMode = NodeLineConstants.Curve;
+        public string LineMode
         {
             get => _lineMode;
             set 

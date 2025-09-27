@@ -1,26 +1,35 @@
 ﻿using NodePro.Abstractions.Attrs;
+using NodePro.Abstractions.Constants;
 using NodePro.Abstractions.Enums;
+using NodePro.Abstractions.Interfaces;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Media;
 
 namespace NodePro.Core
 {
-    public static class LineCalculatorFactory
+    [NodeService(typeof(ILineCalculatorFactory))]
+    public class LineCalculatorFactory:ILineCalculatorFactory
     {
-        private static readonly Dictionary<LineCalculateMode, INodeLineCalculator> _instanceMap = [];
+        private readonly Dictionary<string, INodeLineCalculator> _instanceMap = [];
         // 反射映射表，缓存枚举值与计算器类型的对应关系
-        private static readonly Dictionary<LineCalculateMode, Type> _reflectionMap = [];
+        private readonly Dictionary<string, Type> _reflectionMap = [];
 
-        static LineCalculatorFactory()
+        public LineCalculatorFactory(NodeRegister register)
         {
-            // 初始化反射映射表
-            InitializeReflectionMap();
+            Type[] types = register.GetRegisterTypes(NodeRegisterConstants.Lines);
+            foreach (Type type in types) 
+            {
+                NodeLineAttribute? lineAttribute = type.GetCustomAttribute<NodeLineAttribute>();
+                if (lineAttribute is null) continue;
+                _reflectionMap.Add(lineAttribute.Key, type);
+            }
         }
 
         /// <summary>
         /// 获取指定模式的线条计算器
         /// </summary>
-        public static INodeLineCalculator GetCalculator(LineCalculateMode mode)
+        public INodeLineCalculator GetCalculator(string mode)
         {
             // 检查缓存中是否已有实例
             if (_instanceMap.TryGetValue(mode, out var calculator))
@@ -34,7 +43,7 @@ namespace NodePro.Core
             return calculator;
         }
 
-        public static INodeLineCalculator CreateCalculator(LineCalculateMode mode)
+        private INodeLineCalculator CreateCalculator(string mode)
         {
             if (!_reflectionMap.TryGetValue(mode, out Type? calculateType))
             {
@@ -43,31 +52,9 @@ namespace NodePro.Core
             INodeLineCalculator nodeLineCalculator = Activator.CreateInstance(calculateType) as INodeLineCalculator ?? throw new InvalidOperationException($"无法创建{calculateType.FullName}的无参实例");
             return nodeLineCalculator;
         }
-        /// <summary>
-        /// 初始化反射映射表，通过反射获取枚举值与计算器类型的对应关系
-        /// </summary>
-        private static void InitializeReflectionMap()
-        {
-            var enumType = typeof(LineCalculateMode);
-            var enumValues = Enum.GetValues(enumType);
-
-            foreach (LineCalculateMode mode in enumValues)
-            {
-                var memberInfo = enumType.GetMember(mode.ToString())[0];
-
-                if (memberInfo.GetCustomAttributes(typeof(NodeLineAttribute), false)
-                                          .FirstOrDefault() is not NodeLineAttribute attribute) continue;
-                _reflectionMap.TryAdd(mode, attribute.CalculatorType);
-
-            }
-        }
     }
 
     
 
-    public interface INodeLineCalculator
-    {
-        PathFigure Calculate(Point start, Point end);
-    }
 
 }

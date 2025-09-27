@@ -1,5 +1,6 @@
 ﻿using NodePro.Abstractions.Arguments;
 using NodePro.Abstractions.Attrs;
+using NodePro.Abstractions.Constants;
 using NodePro.Abstractions.Enums;
 using NodePro.Abstractions.Interfaces;
 using NodePro.Core.Node;
@@ -14,17 +15,24 @@ namespace NodePro.Core
     [NodeService]
     public class NodeLineCreator
     {
-        private LineCalculateMode _lineMode = LineCalculateMode.Straight;
-        public LineCalculateMode LineMode
+        private string _lineMode = NodeLineConstants.Straight;
+        private readonly LineCalculatorFactory _lineCalculatorFactory;
+        public string LineMode
         {
             get => _lineMode;
             set => _lineMode = value;
         }
+
+        public NodeLineCreator(LineCalculatorFactory factory)
+        {
+            _lineCalculatorFactory = factory;
+        }
+
         public NodeLine CreateLine(INotifyPosition source,INotifyPosition target)
         {
-            NodeLine line = new NodeLine(source, target)
+            NodeLine line = new NodeLine(source, target, _lineCalculatorFactory)
             {
-                Mode = LineMode
+                Mode = LineMode,
             };
             return line;
         }

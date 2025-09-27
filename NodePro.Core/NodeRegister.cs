@@ -1,6 +1,7 @@
 ﻿using NodePro.Abstractions;
 using NodePro.Abstractions.Attrs;
 using NodePro.Abstractions.Constants;
+using NodePro.Abstractions.Enums;
 using NodePro.Abstractions.Interfaces;
 using NodePro.Abstractions.Models;
 using System.Diagnostics;
@@ -17,7 +18,7 @@ namespace NodePro.Core
         private readonly NodeRegisterConfig? _config;
         private readonly Dictionary<string, HashSet<Type>> _scannedTypes = [];
         private readonly List<NodeRegisterKey> _registerKeys = [];
-        private readonly Dictionary<string, NodeRegisterParameters> _registerParameters = [];
+        private readonly Dictionary<string, NodeRegisterParams> _registerParameters = [];
 
 
         public Assembly[] DllGroup { get; set; } = [];
@@ -34,7 +35,7 @@ namespace NodePro.Core
 
         public static NodeRegister Combine(params string[] paths)
         {
-            NodeRegister[] registers = paths.Select(p => new NodeRegister(p)).ToArray();
+            NodeRegister[] registers = [.. paths.Select(p => new NodeRegister(p))];
             return Combine(registers);
         }
 
@@ -57,38 +58,47 @@ namespace NodePro.Core
             return this;
         }
 
-        public NodeRegisterParameters GetParameters(string key)
+        public NodeRegisterParams GetParameters(string key)
         {
             if(_registerParameters.TryGetValue(key, out var parameters)) return parameters;
             return [];
         }
 
+        public Type[] GetRegisterTypes(string key)
+        {
+            var parameters = GetParameters(key);
+            Type[] types = parameters.GetValues<Type>(key).ToArray();
+            return types;
+        }
+
+        public Type[] GetRegisterTypes(NodeRegisterType type)
+        {
+            List<Type> types = [];
+            foreach (var key in _registerKeys)
+            {
+                if (key.RegisterType != type) continue;
+                types.AddRange(GetRegisterTypes(key.Key));
+            }
+            return types.ToArray();
+        }
+
         public NodeRegister Scan()
         {
             Type[] typesToScan = DllGroup.Select(x => x.GetTypes()).SelectMany(x => x).ToArray() ?? [];
-            NodeRegisterKey[] vaildKeys = _registerKeys.Where(x => !_scannedTypes.ContainsKey(x.Key)).ToArray();
-            foreach(var key in vaildKeys)
+            NodeRegisterKey[] validKeys = _registerKeys.Where(x => !_scannedTypes.ContainsKey(x.Key)).ToArray();
+            foreach(var key in validKeys)
             {
                 _scannedTypes.TryAdd(key.Key, []);
                 _registerParameters.Add(key.Key, []);
             }
             foreach(var type in typesToScan)
             {
-                if (!type.IsClass || type.IsAbstract) continue;
-                foreach (var key in vaildKeys)
-                {
-                    if (key.Filter?.Invoke(type) == false) continue;
-                    var typeGroup = _scannedTypes.GetValueOrDefault(key.Key);
-                    if (typeGroup == null) continue;
-                    typeGroup.Add(type);
-
-                    key.Selected?.Invoke(type, _registerParameters[key.Key]);
-                }
+                ScanType(type, validKeys);
             }
-            _registerKeys.Clear();
             return this;
         }
 
+        #region Config Operation
 
         protected static Assembly[] ReadConfig(NodeRegisterConfig config)
         {
@@ -211,6 +221,35 @@ namespace NodePro.Core
             return (NodeRegisterConfig?)serializer.Deserialize(reader);
         }
 
+        #endregion
+
+        #region Private Methods
+
+        private void ScanType(Type type, params NodeRegisterKey[] validKeys)
+        {
+            if (!type.IsClass || type.IsAbstract) return;
+            NodeRegisterAttribute? register = type.GetCustomAttribute<NodeRegisterAttribute>();
+            if(register == null) return;
+            NodeRegisterFilterParams filterParams = new()
+            {
+                TypeToFilter = type,
+                Tag = register.Tag
+            };
+            foreach (var key in validKeys)
+            {
+                if (key.Filter?.Invoke(filterParams) == false) continue;
+                var typeGroup = _scannedTypes.GetValueOrDefault(key.Key);
+                if (typeGroup == null) continue;
+                bool isSuccess = typeGroup.Add(type);
+                if (isSuccess)
+                {
+                    key.Selected?.Invoke(type, _registerParameters[key.Key]);
+                }
+            }
+        }
+
+        #endregion
+
         protected static bool IsValidAssembly(string path)
         {
             return !string.IsNullOrEmpty(path)
@@ -226,40 +265,18 @@ namespace NodePro.Core
         private static readonly Lazy<NodeRegister> _defaultRegister = new Lazy<NodeRegister>(CreateDefaultRegister);
         public static NodeRegister DefaultRegister => _defaultRegister.Value;
 
-        public static NodeRegisterKey ScanService { get; private set; }
-
-        public static NodeRegisterKey ScanNode { get; private set; }
-
-        public static NodeRegisterKey ScanLine { get; private set; }
-
-        static NodeRegisters()
-        {
-            ScanService = new NodeRegisterKey()
-            {
-                Key = NodeRegisterConstants.Services,
-                Filter = x => x.GetCustomAttribute<NodeServiceAttribute>() != null
-            };
-
-            ScanNode = new NodeRegisterKey()
-            {
-                Key = NodeRegisterConstants.Nodes,
-                Filter = x => x.GetCustomAttribute<NodeAttribute>() != null
-            };
-
-            ScanLine = new NodeRegisterKey()
-            {
-                Key = NodeRegisterConstants.Lines,
-                Filter = x => x.GetCustomAttribute<NodeLineAttribute>() != null,
-                Selected = (type, parameter) =>
-                {
-                    var lineAttr = type.GetCustomAttribute<NodeLineAttribute>();
-                    parameter.Add(lineAttr!.Key, type);
-                }
-            };
-        }
 
         private static NodeRegister CreateDefaultRegister()
         {
+            string serviceKey = NodeRegisterConstants.Services;
+            string nodeKey = NodeRegisterConstants.Nodes;
+            string lineKey = NodeRegisterConstants.Lines;
+
+            var ScanService = new CommonNodeRegisterKey(serviceKey, NodeRegisterType.Singleton);
+            var ScanLine = new CommonNodeRegisterKey(lineKey, NodeRegisterType.Singleton);
+            var ScanNode = new CommonNodeRegisterKey(nodeKey, NodeRegisterType.Instance);
+
+
             NodeRegister register = NodeRegister.Combine(ConfigPath, DllDirPath);
             register.
                 AddKey(ScanNode).

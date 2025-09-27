@@ -1,4 +1,7 @@
-﻿using System;
+﻿using NodePro.Abstractions.Attrs;
+using NodePro.Abstractions.Constants;
+using NodePro.Abstractions.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +11,7 @@ using System.Windows.Media;
 
 namespace NodePro.Core.Lines
 {
+    [NodeLine(NodeLineConstants.Curve)]
     public class CurveLine : INodeLineCalculator
     {
         // 曲线的垂直偏移量，控制弯曲程度（可根据需要调整）

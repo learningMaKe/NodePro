@@ -1,4 +1,5 @@
 ﻿using NodePro.Abstractions;
+using NodePro.Abstractions.Constants;
 using NodePro.Abstractions.Enums;
 using NodePro.Abstractions.Interfaces;
 using System.Windows;
@@ -9,14 +10,15 @@ namespace NodePro.Core.Node
 {
     public class NodeLine:NodeLineBase
     {
-        private LineCalculateMode _mode = LineCalculateMode.Straight;
+        private string _mode = NodeLineConstants.Straight;
         private INodeLineCalculator? _lineCalculator;
+        public ILineCalculatorFactory _lineCalculatorFactory;
 
         public INotifyPosition? Source {  get; private set; }
 
         public INotifyPosition? Target { get; private set; }
 
-        public LineCalculateMode Mode
+        public string Mode
         {
             get => _mode;
             set
@@ -26,7 +28,6 @@ namespace NodePro.Core.Node
                 OnModeChanged();
             }
         }
-
 
         public PathGeometry Data
         {
@@ -38,16 +39,19 @@ namespace NodePro.Core.Node
         public static readonly DependencyProperty DataProperty =
             DependencyProperty.Register("Data", typeof(PathGeometry), typeof(NodeLine), new PropertyMetadata(null));
 
-        public NodeLine(INotifyPosition source,INotifyPosition target)
+        public NodeLine( INotifyPosition source, INotifyPosition target, ILineCalculatorFactory lineCalculatorFactory)
         {
             Source = source;
             Target = target;
-            _lineCalculator = LineCalculatorFactory.GetCalculator(_mode);
+            _lineCalculatorFactory = lineCalculatorFactory;
+            _lineCalculator = _lineCalculatorFactory?.GetCalculator(_mode);
+
             Data = new PathGeometry();
             Canvas.SetZIndex(this, -100);
             WeakEventManager<INotifyPosition, PositionChangedEventArgs>.AddHandler(Source, nameof(INotifyPosition.PositionChangedEventHandler), OnNodeMove);
             WeakEventManager<INotifyPosition, PositionChangedEventArgs>.AddHandler(Target, nameof(INotifyPosition.PositionChangedEventHandler), OnNodeMove);
             Recalculate();
+            _lineCalculatorFactory = lineCalculatorFactory;
         }
 
         private void OnNodeMove(object? notifier, PositionChangedEventArgs args)
@@ -57,7 +61,7 @@ namespace NodePro.Core.Node
 
         private void OnModeChanged()
         {
-            _lineCalculator = LineCalculatorFactory.GetCalculator(_mode);
+            _lineCalculator = _lineCalculatorFactory?.GetCalculator(_mode);
             Recalculate();
         }
 

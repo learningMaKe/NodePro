@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace NodePro.Abstractions.Models
 {
 
-    public class NodeRegisterParameters : ParametersBase
+    public class NodeRegisterParams : ParametersBase
     {
 
     }

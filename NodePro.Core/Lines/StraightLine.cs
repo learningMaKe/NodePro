@@ -1,4 +1,7 @@
-﻿using System;
+﻿using NodePro.Abstractions.Attrs;
+using NodePro.Abstractions.Constants;
+using NodePro.Abstractions.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +11,7 @@ using System.Windows.Media;
 
 namespace NodePro.Core.Lines
 {
+    [NodeLine(NodeLineConstants.Straight)]
     public class StraightLine : INodeLineCalculator
     {
         public PathFigure Calculate(Point start, Point end)

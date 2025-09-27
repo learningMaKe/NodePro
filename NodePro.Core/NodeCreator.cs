@@ -1,4 +1,5 @@
 ﻿using NodePro.Abstractions.Attrs;
+using NodePro.Abstractions.Constants;
 using NodePro.Abstractions.Exceptions;
 using NodePro.Abstractions.Interfaces;
 using NodePro.Abstractions.Models;
@@ -15,7 +16,7 @@ namespace NodePro.Core
 
     }
 
-    [NodeService]
+    [NodeRegister(NodeRegisterConstants.Services)]
     public class NodeCreator
     {
         private readonly IContainerProvider _provider;
