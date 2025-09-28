@@ -15,5 +15,10 @@ namespace NodePro.Abstractions.Attrs
         {
             From = from;
         }
+
+        public override object? GetExtraData()
+        {
+            return From;
+        }
     }
 }

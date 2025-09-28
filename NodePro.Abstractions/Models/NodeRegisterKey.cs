@@ -9,7 +9,7 @@ namespace NodePro.Abstractions.Models
 {
     public delegate bool NodeFilterHandler(NodeRegisterFilterParams paramters);
 
-    public delegate void NodeSelectedHandler(Type selectedType, NodeRegisterParams parameters);
+    public delegate void NodeSelectedHandler(NodeRegisteredData data, NodeRegisterParams parameters);
 
     public class NodeRegisterKey
     {
@@ -34,7 +34,7 @@ namespace NodePro.Abstractions.Models
             Key = key;
             RegisterType = type;
             Filter = x => x.Tag == key;
-            Selected = (type, parameters) => { parameters.Add(key, type); };
+            Selected = (data, parameters) => { parameters.Add(key, data); };
         }
     }
 }

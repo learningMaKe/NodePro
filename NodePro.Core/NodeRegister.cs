@@ -66,20 +66,31 @@ namespace NodePro.Core
 
         public Type[] GetRegisterTypes(string key)
         {
-            var parameters = GetParameters(key);
-            Type[] types = parameters.GetValues<Type>(key).ToArray();
+            Type[] types = GetRegisteredData(key).Select(x => x.DataType).ToArray();
             return types;
         }
 
         public Type[] GetRegisterTypes(NodeRegisterType type)
         {
-            List<Type> types = [];
-            foreach (var key in _registerKeys)
+            return GetRegisteredData(type).Select(x => x.DataType).ToArray();
+        }
+
+        public NodeRegisteredData[] GetRegisteredData(NodeRegisterType nodeRegisterType)
+        {
+            List<NodeRegisteredData> datas = [];
+            foreach(var key in _registerKeys)
             {
-                if (key.RegisterType != type) continue;
-                types.AddRange(GetRegisterTypes(key.Key));
+                if(key.RegisterType != nodeRegisterType) continue;
+                datas.AddRange(GetRegisteredData(key.Key));
             }
-            return types.ToArray();
+            return datas.ToArray();
+        }
+
+        public NodeRegisteredData[] GetRegisteredData(string key)
+        {
+            var parameters = GetParameters(key);
+            NodeRegisteredData[] datas = parameters.GetValues<NodeRegisteredData>(key).ToArray();
+            return datas;
         }
 
         public NodeRegister Scan()
@@ -243,7 +254,8 @@ namespace NodePro.Core
                 bool isSuccess = typeGroup.Add(type);
                 if (isSuccess)
                 {
-                    key.Selected?.Invoke(type, _registerParameters[key.Key]);
+                    NodeRegisteredData data = new(type,register.GetExtraData());
+                    key.Selected?.Invoke(data, _registerParameters[key.Key]);
                 }
             }
         }
