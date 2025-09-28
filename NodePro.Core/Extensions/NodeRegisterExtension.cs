@@ -13,24 +13,15 @@ namespace NodePro.Core.Extensions
     {
         public static void PrismIoc(this NodeRegister register,IContainerRegistry containerRegistry)
         {
-            NodeRegisteredData[] singletons = register.GetRegisteredData(NodeRegisterType.Singleton);
-            Type[] instances = register.GetRegisterTypes(NodeRegisterType.Instance);
-
-            foreach (var singleton in singletons)
+            NodeRegisterType[] types = Enum.GetValues<NodeRegisterType>();
+            foreach (var type in types)
             {
-                Type? interfaceType = singleton.ExtraData as Type;
-                if (interfaceType!=null &&singleton.DataType.IsAssignableFrom(interfaceType))
+                NodeRegisteredData[] registedDatas = register.GetRegisteredData(type);
+                foreach (var data in registedDatas)
                 {
-                    containerRegistry.RegisterSingleton(interfaceType, singleton.DataType);
+                    if (data.Handler is null) continue;
+                    data.Handler.OnRegister(data, containerRegistry);
                 }
-                else
-                {
-                    containerRegistry.RegisterSingleton(singleton.DataType);
-                }
-            }
-            foreach(var instance in instances)
-            {
-                containerRegistry.Register(instance);
             }
         }
     }

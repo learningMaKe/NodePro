@@ -1,4 +1,5 @@
 ﻿using NodePro.Abstractions.Constants;
+using NodePro.Abstractions.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,15 +8,14 @@ using System.Threading.Tasks;
 
 namespace NodePro.Abstractions.Attrs
 {
-    [AttributeUsage(AttributeTargets.Class)]
-    [NodeRegisterFlag(NodeRegisterConstants.HandlerSingleton)]
-    public class NodeLineAttribute:NodeRegisterAttribute
-    {
-        public string Key = string.Empty;
 
-        public NodeLineAttribute(string key):base(NodeRegisterConstants.Lines)
+    [AttributeUsage(AttributeTargets.Class)]
+    public class NodeRegisterFlagAttribute : Attribute
+    {
+        public string Handler { get; init; }
+        public NodeRegisterFlagAttribute(string handler)
         {
-            Key = key;
+            Handler = handler;
         }
     }
 }

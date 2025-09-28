@@ -24,5 +24,12 @@ namespace NodePro.Abstractions.Attrs
             return null;
         }
 
+        public virtual void OnRegister(IContainerRegistry containerRegistry)
+        {
+
+        }
+
+
     }
+
 }

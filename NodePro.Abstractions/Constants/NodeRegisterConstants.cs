@@ -21,5 +21,9 @@ namespace NodePro.Abstractions.Constants
         public const string Nodes = "Nodes";
         public const string Lines = "Lines";
 
+        public const string HandlerSingleton = "HandlerSingleton";
+        public const string HandlerInstance = "HandlerInstance";
+
+
     }
 }

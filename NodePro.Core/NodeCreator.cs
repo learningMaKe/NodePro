@@ -16,7 +16,7 @@ namespace NodePro.Core
 
     }
 
-    [NodeRegister(NodeRegisterConstants.Services)]
+    [NodeService]
     public class NodeCreator
     {
         private readonly IContainerProvider _provider;

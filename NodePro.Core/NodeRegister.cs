@@ -4,12 +4,12 @@ using NodePro.Abstractions.Constants;
 using NodePro.Abstractions.Enums;
 using NodePro.Abstractions.Interfaces;
 using NodePro.Abstractions.Models;
+using NodePro.Core.Registers;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Serialization;
-using static NodePro.Abstractions.Constants.NodeRegisterConstants;
 
 namespace NodePro.Core
 {
@@ -19,6 +19,7 @@ namespace NodePro.Core
         private readonly Dictionary<string, HashSet<Type>> _scannedTypes = [];
         private readonly List<NodeRegisterKey> _registerKeys = [];
         private readonly Dictionary<string, NodeRegisterParams> _registerParameters = [];
+        private readonly Dictionary<string, INodeRegisterTypeHandler> _handlers = [];
 
 
         public Assembly[] DllGroup { get; set; } = [];
@@ -28,6 +29,10 @@ namespace NodePro.Core
             DllGroup = ReadConfig(_config);
         }
 
+        internal NodeRegister()
+        {
+            
+        }
         private NodeRegister(params Assembly[] assemblies)
         {
             DllGroup = assemblies;
@@ -241,6 +246,12 @@ namespace NodePro.Core
             if (!type.IsClass || type.IsAbstract) return;
             NodeRegisterAttribute? register = type.GetCustomAttribute<NodeRegisterAttribute>();
             if(register == null) return;
+            INodeRegisterTypeHandler? handler = null;
+            NodeRegisterFlagAttribute? flag = register.GetType().GetCustomAttribute<NodeRegisterFlagAttribute>();
+            if (flag != null)
+            {
+                handler = _handlers.GetValueOrDefault(flag.Handler);
+            }
             NodeRegisterFilterParams filterParams = new()
             {
                 TypeToFilter = type,
@@ -254,7 +265,12 @@ namespace NodePro.Core
                 bool isSuccess = typeGroup.Add(type);
                 if (isSuccess)
                 {
-                    NodeRegisteredData data = new(type,register.GetExtraData());
+                    NodeRegisteredData data = new()
+                    {
+                        DataType = type,
+                        ExtraData = register.GetExtraData(),
+                        Handler = handler,
+                    };
                     key.Selected?.Invoke(data, _registerParameters[key.Key]);
                 }
             }
@@ -268,6 +284,13 @@ namespace NodePro.Core
                    && File.Exists(path)
                    && string.Equals(Path.GetExtension(path), ".dll", StringComparison.OrdinalIgnoreCase);
         }
+
+        public NodeRegister AddHandler<THandler>(string key,THandler handler) where THandler : class, INodeRegisterTypeHandler
+        {
+            _handlers.TryAdd(key, handler);
+            return this;
+        }
+
 
     }
 
@@ -288,14 +311,18 @@ namespace NodePro.Core
             var ScanLine = new CommonNodeRegisterKey(lineKey, NodeRegisterType.Singleton);
             var ScanNode = new CommonNodeRegisterKey(nodeKey, NodeRegisterType.Instance);
 
-
-            NodeRegister register = NodeRegister.Combine(ConfigPath, DllDirPath);
-            register.
-                AddKey(ScanNode).
+            return NodeRegisterBuilder.
+                GetBuilder().
+                AddConfig(NodeRegisterConstants.ConfigPath).
+                AddConfig(NodeRegisterConstants.DllDirPath).
+                Completed().
+                AddHandler<SingletonHandler>(NodeRegisterConstants.HandlerSingleton).
+                AddHandler<InstanceHandler>(NodeRegisterConstants.HandlerInstance).
+                Completed().
                 AddKey(ScanService).
                 AddKey(ScanLine).
-                Scan();
-            return register;
+                AddKey(ScanNode).
+                Build();
         }
     }
 
