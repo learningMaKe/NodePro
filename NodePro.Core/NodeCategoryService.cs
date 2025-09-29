@@ -15,10 +15,12 @@ namespace NodePro.Core
     [NodeService]
     public class NodeCategoryService
     {
-        private class CategoryItem : Dictionary<string, Type>
+        private class CategoryItem : Dictionary<string, CategoryItem>
         {
 
             public string Content = string.Empty;
+
+            public Type? Target;
 
             public CategoryItem(string content)
             {
@@ -40,17 +42,32 @@ namespace NodePro.Core
                 {
                     category = attribute.Category;
                 }
-                CategoryItem item = ParseCategory(category);
-                
-
+                ParseCategory(category, type);
             }
         }
         //ToDo: 解析Category
-        private CategoryItem ParseCategory(string category)
+        private void ParseCategory(string category,Type target)
         {
-            string[] items = category.Split('\\', '/');
-            throw new NotImplementedException();
+            string[] contents = category.Split('\\', '/');
+            CategoryItem current = Root;
+            foreach (var content in contents) 
+            {
+                CategoryItem item = GetOrCreateItem(current, content);
+                current = item;
+            }
+            current.Target = target;
 
+        }
+
+        private CategoryItem GetOrCreateItem(CategoryItem item, string content)
+        {
+            CategoryItem? next = item.GetValueOrDefault(content);
+            if (next == null)
+            {
+                next = new CategoryItem(content);
+                item.Add(content, next);
+            }
+            return next;
         }
 
 
