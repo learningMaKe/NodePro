@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 namespace NodePro.Abstractions.Attrs
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
-    [NodeRegisterFlag(NodeRegisterConstants.HandlerInstance)]
+    [NodeRegisterFlag(NodeConstants.HandlerInstance)]
     public class NodeAttribute : NodeRegisterAttribute
     {
-        public NodeAttribute() : base(NodeRegisterConstants.Nodes)
+        public NodeAttribute() : base(NodeConstants.KeyNodes)
         {
         }
     }

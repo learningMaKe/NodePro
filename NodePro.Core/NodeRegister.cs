@@ -13,7 +13,7 @@ using System.Xml.Serialization;
 
 namespace NodePro.Core
 {
-    public class NodeRegister
+    public class NodeRegister:INodeRegister
     {
         private readonly NodeRegisterConfig? _config;
         private readonly Dictionary<string, HashSet<Type>> _scannedTypes = [];
@@ -21,12 +21,11 @@ namespace NodePro.Core
         private readonly Dictionary<string, NodeRegisterParams> _registerParameters = [];
         private readonly Dictionary<string, INodeRegisterTypeHandler> _handlers = [];
 
-
         public Assembly[] DllGroup { get; set; } = [];
         public NodeRegister(string path)
         {
-            _config = LoadConfig(path);
-            DllGroup = ReadConfig(_config);
+            _config = NodeConfiger.LoadConfig(path);
+            DllGroup = NodeConfiger.ReadConfig(_config);
         }
 
         internal NodeRegister()
@@ -114,130 +113,6 @@ namespace NodePro.Core
             return this;
         }
 
-        #region Config Operation
-
-        protected static Assembly[] ReadConfig(NodeRegisterConfig config)
-        {
-            // 验证配置和DLL列表
-            if (config?.DllGroup == null || config.DllGroup.Count == 0)
-                return [];
-
-
-            HashSet<Assembly> assemblies = [];
-            HashSet<string> assemblyKeys = [];
-
-            bool AddAssemblyIfNotExists(Assembly assembly)
-            {
-                string? fullName = assembly.FullName;
-                if (string.IsNullOrEmpty(fullName)) return false;
-                if (!assemblyKeys.Add(fullName)) return false;
-                return assemblies.Add(assembly);
-            }
-            // 处理配置文件中的DLL
-            foreach (string dllPath in config.DllGroup.Where(IsValidAssembly))
-            {
-                try
-                {
-                    Assembly assembly = Assembly.LoadFrom(dllPath);
-                    AddAssemblyIfNotExists(assembly);
-                }
-                catch (Exception ex)
-                {
-                    // 记录加载失败的异常信息
-                    Debug.WriteLine($"加载程序集 {dllPath} 失败: {ex.Message}");
-                }
-            }
-
-
-            // 添加调用方和当前程序集（并检查是否已存在）
-            AddAssemblyIfNotExists(Assembly.GetCallingAssembly());
-            AddAssemblyIfNotExists(Assembly.GetExecutingAssembly());
-
-            return assemblies.ToArray();
-        }
-
-        protected static NodeRegisterConfig LoadConfig(string path)
-        {
-            if (string.IsNullOrWhiteSpace(path)) return new NodeRegisterConfig();
-            NodeRegisterConfig? res = null;
-            if (File.Exists(path))
-            {
-                res = LoadConfigByFile(path);
-            }
-            else if (Directory.Exists(path))
-            {
-                res = LoadConfigByDir(path);
-            }
-            res ??= new NodeRegisterConfig();
-            return res;
-        }
-
-        protected static NodeRegisterConfig? LoadConfigByDir(string path)
-        {
-            DirectoryInfo dir = new(path);
-            if (!dir.Exists) return null;
-            List<string> files = [.. dir.GetFiles().Where(x => IsValidAssembly(x.Name)).Select(x => x.FullName)];
-
-            NodeRegisterConfig config = new()
-            {
-                DllGroup = files
-            };
-
-            return config;
-        }
-
-        protected static NodeRegisterConfig? LoadConfigByFile(string path)
-        {
-            NodeRegisterConfig? config = null;
-            string? dir = Path.GetDirectoryName(path);
-            if (string.IsNullOrWhiteSpace(dir))
-            {
-                throw new ArgumentException($"Invalid Path");
-            }
-            if (!Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir);
-            }
-            if (!File.Exists(path))
-            {
-                using FileStream fs = new(path, FileMode.Create);
-                using StreamWriter writer = new(fs);
-                config = new NodeRegisterConfig();
-                string xml = SerializeConfig(config);
-                writer.Write(xml);
-            }
-            else
-            {
-                using StreamReader reader = new(path);
-                string xml = reader.ReadToEnd();
-                config = DeserializeConfig(xml);
-            }
-            return config;
-        }
-
-        protected static string SerializeConfig(NodeRegisterConfig config)
-        {
-            if (config is null) return string.Empty;
-            var serializer = new XmlSerializer(typeof(NodeRegisterConfig));
-            using var sw = new StringWriter();
-            serializer.Serialize(sw, config);
-            return sw.ToString();
-        }
-
-        protected static NodeRegisterConfig? DeserializeConfig(string xml)
-        {
-            if (string.IsNullOrEmpty(xml))
-                return null;
-
-            // 创建XmlSerializer实例
-            var serializer = new XmlSerializer(typeof(NodeRegisterConfig));
-
-            // 使用StringReader读取XML内容并反序列化
-            using var reader = new StringReader(xml);
-            return (NodeRegisterConfig?)serializer.Deserialize(reader);
-        }
-
-        #endregion
 
         #region Private Methods
 
@@ -303,9 +178,9 @@ namespace NodePro.Core
 
         private static NodeRegister CreateDefaultRegister()
         {
-            string serviceKey = NodeRegisterConstants.Services;
-            string nodeKey = NodeRegisterConstants.Nodes;
-            string lineKey = NodeRegisterConstants.Lines;
+            string serviceKey = NodeConstants.KeyServices;
+            string nodeKey = NodeConstants.KeyNodes;
+            string lineKey = NodeConstants.KeyLines;
 
             var ScanService = new CommonNodeRegisterKey(serviceKey, NodeRegisterType.Singleton);
             var ScanLine = new CommonNodeRegisterKey(lineKey, NodeRegisterType.Singleton);
@@ -313,11 +188,11 @@ namespace NodePro.Core
 
             return NodeRegisterBuilder.
                 GetBuilder().
-                AddConfig(NodeRegisterConstants.ConfigPath).
-                AddConfig(NodeRegisterConstants.DllDirPath).
+                AddConfig(NodeConstants.PathConfig).
+                AddConfig(NodeConstants.PathDllDir).
                 Completed().
-                AddHandler<SingletonHandler>(NodeRegisterConstants.HandlerSingleton).
-                AddHandler<InstanceHandler>(NodeRegisterConstants.HandlerInstance).
+                AddHandler<SingletonHandler>(NodeConstants.HandlerSingleton).
+                AddHandler<InstanceHandler>(NodeConstants.HandlerInstance).
                 Completed().
                 AddKey(ScanService).
                 AddKey(ScanLine).

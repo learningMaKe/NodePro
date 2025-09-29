@@ -3,7 +3,7 @@
 namespace NodePro.Core
 {
     [NodeService]
-    public class NodeFormatter
+    public class NodeFormatService
     {
 
     }

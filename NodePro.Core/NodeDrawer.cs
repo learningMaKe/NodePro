@@ -17,7 +17,7 @@ namespace NodePro.Core
     public class NodeDrawer
     {
         private readonly IContainerProvider _containerProvider;
-        private readonly NodeCreator _creator;
+        private readonly NodeCreateService _creator;
         private readonly NodeLineCreator _lineCreator;
         private readonly NodeCanvas _canvas;
 
@@ -37,7 +37,7 @@ namespace NodePro.Core
         public NodeDrawer(IContainerProvider containerProvider, NodeCanvas canvas)
         {
             _containerProvider = containerProvider;
-            _creator = containerProvider.Resolve<NodeCreator>();
+            _creator = containerProvider.Resolve<NodeCreateService>();
             _lineCreator = containerProvider.Resolve<NodeLineCreator>();
             _canvas = canvas;
             InitCanvas();

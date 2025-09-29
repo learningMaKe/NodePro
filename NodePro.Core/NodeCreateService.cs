@@ -5,6 +5,7 @@ using NodePro.Abstractions.Interfaces;
 using NodePro.Abstractions.Models;
 using NodePro.Core.Model;
 using NodePro.Core.Node;
+using Prism.Ioc;
 using System.Windows;
 
 namespace NodePro.Core
@@ -17,11 +18,11 @@ namespace NodePro.Core
     }
 
     [NodeService]
-    public class NodeCreator
+    public class NodeCreateService
     {
         private readonly IContainerProvider _provider;
 
-        public NodeCreator(IContainerProvider provider)
+        public NodeCreateService(IContainerProvider provider)
         {
             _provider = provider;
         }
@@ -81,6 +82,24 @@ namespace NodePro.Core
             return container;
         }
 
+        public NodeContainer? CreateContainer(Type sheetType,NodeInitArgs? args = null)
+        {
+            var sheet = _provider.Resolve(sheetType) as NodeSheet;
+            if (sheet is null) 
+            {
+                NodeMissingException.Throw(sheetType);
+                return null;
+            }
+            args ??= new NodeInitArgs();
+            NodeElementGroup group = CreateElementGroup(sheet);
+            NodeContainer container = new NodeContainer()
+            {
+                Position = args.Position,
+                Header = sheet.Title,
+                Elements = group,
+            };
+            return container;
 
+        }
     }
 }

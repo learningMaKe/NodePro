@@ -7,6 +7,7 @@ using System.Xml.Serialization;
 
 namespace NodePro.Abstractions.Models
 {
+    [XmlRoot("NodeConfig")]
     public class NodeRegisterConfig
     {
 

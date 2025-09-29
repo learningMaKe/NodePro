@@ -14,7 +14,7 @@ namespace NodePro.Core
     {
 
         protected IContainerProvider _containerProvider;
-        protected NodeCreator _creator;
+        protected NodeCreateService _creator;
 
         private static readonly Dictionary<Type, NodeProperty[]> _reflectionProperties = [];
         public abstract string Title { get; }
@@ -22,7 +22,7 @@ namespace NodePro.Core
         protected NodeSheet(IContainerProvider containerProvider) 
         {
             _containerProvider = containerProvider;
-            _creator = containerProvider.Resolve<NodeCreator>();
+            _creator = containerProvider.Resolve<NodeCreateService>();
         }
 
         public abstract NodeData DataProcess(NodeData data);

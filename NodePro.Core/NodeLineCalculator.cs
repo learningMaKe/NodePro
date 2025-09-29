@@ -15,9 +15,9 @@ namespace NodePro.Core
         // 反射映射表，缓存枚举值与计算器类型的对应关系
         private readonly Dictionary<string, Type> _reflectionMap = [];
 
-        public LineCalculatorFactory(NodeRegister register)
+        public LineCalculatorFactory(INodeRegister register)
         {
-            Type[] types = register.GetRegisterTypes(NodeRegisterConstants.Lines);
+            Type[] types = register.GetRegisterTypes(NodeConstants.KeyLines);
             foreach (Type type in types) 
             {
                 NodeLineAttribute? lineAttribute = type.GetCustomAttribute<NodeLineAttribute>();

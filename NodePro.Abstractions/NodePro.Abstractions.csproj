@@ -8,17 +8,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Config\Node.config" />
+    <None Remove="Config\Log4net.config" />
+    <None Remove="Config\Node.Config" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Config\Log4net.config" />
+    <Resource Include="Config\Node.Config">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Prism.DryIoc" Version="9.0.537" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Config\Node.config">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

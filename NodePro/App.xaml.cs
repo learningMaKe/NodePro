@@ -1,4 +1,5 @@
-﻿using NodePro.Core;
+﻿using NodePro.Abstractions.Interfaces;
+using NodePro.Core;
 using NodePro.Core.Extensions;
 using NodePro.Services;
 using NodePro.Services.Interfaces;
@@ -22,13 +23,19 @@ namespace NodePro
             return Container.Resolve<MainWindow>();
         }
 
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            NodeIniter.InitEnvironment();
+            base.OnStartup(e);
+        }
+
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterSingleton<IContentDialogService, ContentDialogService>();
             containerRegistry.RegisterSingleton<INodeService, NodeService>();
             NodeRegister register = NodeRegisters.DefaultRegister;
             register.PrismIoc(containerRegistry);
-            containerRegistry.RegisterInstance(register);
+            containerRegistry.RegisterInstance<INodeRegister>(register);
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)

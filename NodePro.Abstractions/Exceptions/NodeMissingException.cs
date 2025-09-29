@@ -29,5 +29,10 @@ namespace NodePro.Abstractions.Exceptions
         {
             throw new NodeMissingException($"缺失节点:{typeof(TSheet).Name}", typeof(TSheet));
         }
+
+        public static void Throw(Type type) 
+        {
+            throw new NodeMissingException($"缺失节点:{type.Name}", type);
+        }
     }
 }
