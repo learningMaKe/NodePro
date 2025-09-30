@@ -45,15 +45,16 @@ namespace NodePro.Core
 
         #region Public Method
 
-        public void DrawNode<TSheet>(double x, double y) where TSheet : NodeSheet => DrawNode<TSheet>(new System.Windows.Point(x, y));
+        public void DrawNode<TSheet>(double x, double y) where TSheet : INodeSheet => DrawNode<TSheet>(new System.Windows.Point(x, y));
 
-        public void DrawNode<TSheet>(Point position) where TSheet : NodeSheet
+        public void DrawNode<TSheet>(Point position) where TSheet : INodeSheet
         {
             NodeInitArgs args = new()
             {
                 Position = position,
             };
-            NodeContainer container = _creator.CreateContainer<TSheet>(args);
+            NodeContainer? container = _creator.CreateContainer<TSheet>(args);
+            if (container is null) return;
             AddToCanvas(container);
         }
 

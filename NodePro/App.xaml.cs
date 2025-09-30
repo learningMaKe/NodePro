@@ -1,6 +1,7 @@
 ﻿using NodePro.Abstractions.Interfaces;
 using NodePro.Core;
 using NodePro.Core.Extensions;
+using NodePro.Core.Node;
 using NodePro.Services;
 using NodePro.Services.Interfaces;
 using NodePro.ViewModels;
@@ -25,7 +26,6 @@ namespace NodePro
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            NodeIniter.InitEnvironment();
             base.OnStartup(e);
         }
 

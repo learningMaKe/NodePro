@@ -1,4 +1,5 @@
-﻿using NodePro.Core;
+﻿using NodePro.Abstractions.Interfaces;
+using NodePro.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +13,9 @@ namespace NodePro.Services.Interfaces
     {
         public void RegisterTemplate(string key, DataTemplate template);
 
-        public void RegisterSheet<TSheet>(string key) where TSheet : NodeSheet;
+        public void RegisterSheet<TSheet>(string key) where TSheet : INodeSheet;
 
-        public void ProvideNode<TSheet>() where TSheet : NodeSheet;
+        public void ProvideNode<TSheet>() where TSheet : INodeSheet;
 
 
     }

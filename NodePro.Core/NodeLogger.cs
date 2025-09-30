@@ -34,9 +34,9 @@ namespace NodePro.Core
 
         public static readonly log4net.ILog devicelog = log4net.LogManager.GetLogger("loginfo");
 
-        public static void InitEnvironment()
+        static NodeLogger()
         {
-            NodeIniter.CheckFile(NodeConstants.PathLog, NodeConstants.PathEmbedderLog);
+            CommonUtils.CheckFile(NodeConstants.PathLog, NodeConstants.PathEmbedderLog);
             StartWork();
         }
 

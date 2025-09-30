@@ -24,8 +24,8 @@ namespace NodePro.Core
         public Assembly[] DllGroup { get; set; } = [];
         public NodeRegister(string path)
         {
-            _config = NodeConfiger.LoadConfig(path);
-            DllGroup = NodeConfiger.ReadConfig(_config);
+            _config = NodeConfigger.LoadConfig(path);
+            DllGroup = NodeConfigger.ReadConfig(_config);
         }
 
         internal NodeRegister()

@@ -6,6 +6,8 @@ using NodePro.Abstractions.Models;
 using NodePro.Core.Model;
 using NodePro.Core.Node;
 using Prism.Ioc;
+using System.Diagnostics;
+using System.Reflection;
 using System.Windows;
 
 namespace NodePro.Core
@@ -21,6 +23,8 @@ namespace NodePro.Core
     public class NodeCreateService
     {
         private readonly IContainerProvider _provider;
+
+        private readonly Dictionary<Type, NodeProperty[]> _reflectionProperties = [];
 
         public NodeCreateService(IContainerProvider provider)
         {
@@ -53,7 +57,7 @@ namespace NodePro.Core
                 sheet ??= _provider.Resolve<TSheet>();
             }
             var group = new NodeElementGroup();
-            NodeProperty[] props = sheet.GetAttributes();
+            NodeProperty[] props = GetAttributes(sheet.GetType());
             foreach (var prop in props)
             {
                 NodeElement element = CreateElement(sheet, prop);
@@ -63,28 +67,14 @@ namespace NodePro.Core
             return group;
         }
 
-        public NodeContainer CreateContainer<TSheet>(NodeInitArgs? args = null) where TSheet : NodeSheet
+        public NodeContainer? CreateContainer<TSheet>(NodeInitArgs? args = null) where TSheet : INodeSheet
         {
-            if (!_provider.IsRegistered<TSheet>())
-            {
-                NodeMissingException.Throw<TSheet>();
-            }
-            var sheet = _provider.Resolve<TSheet>();
-            args ??= new NodeInitArgs();
-            NodeElementGroup group=CreateElementGroup(sheet);
-            NodeContainer container = new NodeContainer()
-            {
-                Position = args.Position,
-                Header = sheet.Title,
-                Elements = group,
-            };
-            
-            return container;
+            return CreateContainer(typeof(TSheet), args);
         }
 
         public NodeContainer? CreateContainer(Type sheetType,NodeInitArgs? args = null)
         {
-            var sheet = _provider.Resolve(sheetType) as NodeSheet;
+            var sheet = _provider.Resolve(sheetType) as INodeSheet;
             if (sheet is null) 
             {
                 NodeMissingException.Throw(sheetType);
@@ -100,6 +90,39 @@ namespace NodePro.Core
             };
             return container;
 
+        }
+
+        public NodeProperty[] GetAttributes(Type nodeType)
+        {
+            NodeProperty[]? attributes = [];
+            try
+            {
+
+                if (!_reflectionProperties.TryGetValue(nodeType, out attributes))
+                {
+                    PropertyInfo[] props = nodeType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                    List<NodeProperty> targets = [];
+                    foreach (var prop in props)
+                    {
+                        NodePropertyAttribute? nodeProp = prop.GetCustomAttribute<NodePropertyAttribute>();
+                        if (nodeProp is null) continue;
+                        NodeOrderAttribute? nodeOrder = prop.GetCustomAttribute<NodeOrderAttribute>();
+                        NodeProperty property = new()
+                        {
+                            Property = prop,
+                            NodePropertyAttribute = nodeProp,
+                            NodeOrderAttribute = nodeOrder
+                        };
+                        targets.Add(property);
+                    }
+                    attributes = targets.ToArray();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"{nodeType.FullName}获取属性出错:{ex.Message}");
+            }
+            return attributes!;
         }
     }
 }

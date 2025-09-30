@@ -1,4 +1,5 @@
-﻿using NodePro.Core;
+﻿using NodePro.Abstractions.Interfaces;
+using NodePro.Core;
 using NodePro.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -16,12 +17,12 @@ namespace NodePro.Services
 
         }
 
-        public void ProvideNode<TSheet>() where TSheet : NodeSheet
+        public void ProvideNode<TSheet>() where TSheet : INodeSheet
         {
             throw new NotImplementedException();
         }
 
-        public void RegisterSheet<TSheet>(string key) where TSheet : NodeSheet
+        public void RegisterSheet<TSheet>(string key) where TSheet : INodeSheet
         {
             throw new NotImplementedException();
         }

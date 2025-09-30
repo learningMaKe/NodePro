@@ -37,7 +37,7 @@ namespace NodePro.Modules.Display.ViewModels
 
             _drawer.DrawNode<DemoSheet>(500, 500);
             _drawer.DrawNode<DemoSheet>(700, 500);
-            _drawer.DrawNode<DemoSheet>(900, 500);
+            _drawer.DrawNode<Demo2Sheet>(900, 500);
         }
 
         #endregion

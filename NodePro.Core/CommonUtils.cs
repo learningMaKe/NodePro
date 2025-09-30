@@ -1,7 +1,5 @@
-﻿using NodePro.Abstractions.Constants;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,15 +8,9 @@ using System.Windows;
 
 namespace NodePro.Core
 {
-    public static class NodeIniter
+    public class CommonUtils
     {
-        public static void InitEnvironment()
-        {
-            NodeLogger.InitEnvironment();
-            NodeConfiger.InitEnvironment();
-        }
-
-        public static void CheckFile(string path,string embeddedPath)
+        public static void CheckFile(string path, string embeddedPath)
         {
             string configPath = path;
             FileInfo configInfo = new FileInfo(configPath);

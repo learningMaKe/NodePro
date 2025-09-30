@@ -1,13 +1,15 @@
 ﻿using NodePro.Abstractions.Attrs;
+using NodePro.Abstractions.Interfaces;
+using NodePro.Abstractions.Models;
 using NodePro.Core;
 
 namespace NodePro.Sheet
 {
 
     [Node,NodeCategory("Common")]
-    public class DemoSheet : NodeSheet
+    public class DemoSheet : INodeSheet
     {
-        public override string Title => "测试节点";
+        public string Title => "测试节点";
 
         [Input("NoFormat", "IntValue")]
         public string Value { get; set; } = "测试";
@@ -23,12 +25,8 @@ namespace NodePro.Sheet
         [Output("Formateee"),NodeOrder(5)]
         public string Demo { get; set; } = "阿西吧";
 
-        public DemoSheet(IContainerProvider provider) : base(provider)
-        {
 
-        }
-
-        public override NodeData DataProcess(NodeData data)
+        public NodeData DataProcess(NodeData data)
         {
             throw new NotImplementedException();
         }

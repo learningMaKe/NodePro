@@ -1,4 +1,5 @@
 ﻿using NodePro.Abstractions.Constants;
+using NodePro.Abstractions.Interfaces;
 using NodePro.Abstractions.Models;
 using System;
 using System.Collections.Generic;
@@ -13,12 +14,13 @@ using System.Xml.Serialization;
 
 namespace NodePro.Core
 {
-    public class NodeConfiger
+    public static class NodeConfigger
     {
-        public static void InitEnvironment()
+
+        static NodeConfigger()
         {
-            NodeIniter.CheckDir(NodeConstants.PathDllDir);
-            NodeIniter.CheckFile(NodeConstants.PathConfig, NodeConstants.PathEmbeddedConfig);
+            CommonUtils.CheckDir(NodeConstants.PathDllDir);
+            CommonUtils.CheckFile(NodeConstants.PathConfig, NodeConstants.PathEmbeddedConfig);
         }
 
         #region Config Operation
@@ -154,6 +156,8 @@ namespace NodePro.Core
                    && File.Exists(path)
                    && string.Equals(Path.GetExtension(path), ".dll", StringComparison.OrdinalIgnoreCase);
         }
+
+
 
     }
 }

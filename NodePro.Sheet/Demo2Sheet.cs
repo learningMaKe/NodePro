@@ -1,4 +1,6 @@
 ﻿using NodePro.Abstractions.Attrs;
+using NodePro.Abstractions.Interfaces;
+using NodePro.Abstractions.Models;
 using NodePro.Core;
 using System;
 using System.Collections.Generic;
@@ -9,9 +11,9 @@ using System.Threading.Tasks;
 namespace NodePro.Sheet
 {
     [Node,NodeCategory("Demo2")]
-    public class Demo2Sheet:NodeSheet
+    public class Demo2Sheet:INodeSheet
     {
-        public override string Title => "测试节点";
+        public string Title => "测试节点";
 
         [Input("NoFormat", "IntValue")]
         public string Value { get; set; } = "测试";
@@ -22,17 +24,12 @@ namespace NodePro.Sheet
 
 
         [Input("NoFormat", "TestValue")]
-        public string Test { get; set; } = "不想加班";
+        public string Test { get; set; } = "要放国庆节了，万岁！";
 
         [Output("Formateee"), NodeOrder(5)]
         public string Demo { get; set; } = "阿西吧";
 
-        public DemoSheet(IContainerProvider provider) : base(provider)
-        {
-
-        }
-
-        public override NodeData DataProcess(NodeData data)
+        public NodeData DataProcess(NodeData data)
         {
             throw new NotImplementedException();
         }
