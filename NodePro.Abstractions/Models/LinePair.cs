@@ -14,16 +14,16 @@ namespace NodePro.Abstractions.Models
 
         public ConnectionEndpoint Target { get; set; }
 
-        public NodeLineBase Line { get; set; }
+        public INodeLine Line { get; set; }
 
-        public LinePair(ConnectionEndpoint source, ConnectionEndpoint target, NodeLineBase line)
+        public LinePair(ConnectionEndpoint source, ConnectionEndpoint target, INodeLine line)
         {
             Source = source;
             Target = target;
             Line = line;
         }
 
-        public LinePair(NodeConnectEventArgs args, NodeLineBase line)
+        public LinePair(NodeConnectEventArgs args, INodeLine line)
         {
             Source = args.NodeSource;
             Target = args.NodeTarget;

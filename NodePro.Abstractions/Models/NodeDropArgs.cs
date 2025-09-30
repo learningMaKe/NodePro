@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 
-namespace NodePro.Abstractions
+namespace NodePro.Abstractions.Models
 {
-    public class NodeLineBase : Control, INodeLine
+    public class NodeDropArgs:EventArgs
     {
+        public INodeConnector? StartFrom;
 
+        public INodeConnector? LeaveFrom;
     }
 }

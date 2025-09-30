@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 namespace NodePro.Abstractions.Models
 {
     // 代表连接的一方（节点+连接器）
-    public readonly struct ConnectionEndpoint(NodeContainerBase node, NodeConnectorBase connector)
+    public readonly struct ConnectionEndpoint(INodeContainer node, INodeConnector connector)
     {
-        public NodeContainerBase Node { get; } = node ?? throw new ArgumentNullException(nameof(node));
-        public NodeConnectorBase Connector { get; } = connector ?? throw new ArgumentNullException(nameof(connector));
+        public INodeContainer Node { get; } = node ?? throw new ArgumentNullException(nameof(node));
+        public INodeConnector Connector { get; } = connector ?? throw new ArgumentNullException(nameof(connector));
     }
 }

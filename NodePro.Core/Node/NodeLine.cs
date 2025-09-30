@@ -8,7 +8,7 @@ using System.Windows.Media;
 
 namespace NodePro.Core.Node
 {
-    public class NodeLine:NodeLineBase
+    public class NodeLine:Control,INodeLine
     {
         private string _mode = NodeLineConstants.Straight;
         private INodeLineCalculator? _lineCalculator;

@@ -10,8 +10,8 @@ namespace NodePro.Abstractions.Arguments
 {
     public class ConnectStartEventArgs : RoutedEventArgs
     {
-        public NodeConnectorBase From { get; private set; }
-        public ConnectStartEventArgs(RoutedEvent routed, NodeConnectorBase from) : base(routed)
+        public INodeConnector From { get; private set; }
+        public ConnectStartEventArgs(RoutedEvent routed, INodeConnector from) : base(routed)
         {
             From = from;
         }

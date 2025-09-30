@@ -26,6 +26,8 @@ namespace NodePro.Abstractions.Constants
         public const string HandlerSingleton = "HandlerSingleton";
         public const string HandlerInstance = "HandlerInstance";
 
+        public const string ParamsDrop = "ParamsDrop";
+
 
     }
 }

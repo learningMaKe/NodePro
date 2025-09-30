@@ -21,6 +21,6 @@ namespace NodePro.Abstractions.Interfaces
     {
         public event PositionChangedEventHandler? PositionChangedEventHandler;
 
-        public Point Position { get; set; }
+        public Point Position { get; }
     }
 }

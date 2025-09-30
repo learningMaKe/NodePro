@@ -4,7 +4,7 @@
     xmlns:convert="clr-namespace:NodePro.Core.Converters;assembly=NodePro.Core"
     xmlns:core="clr-namespace:NodePro.Core.Node;assembly=NodePro.Core"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-    xmlns:model="clr-namespace:NodePro.Core.Model;assembly=NodePro.Core"
+    xmlns:model="clr-namespace:NodePro.Abstractions.Models;assembly=NodePro.Abstractions"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/NodePro.UI;component/Brushes.xaml" />
@@ -13,6 +13,7 @@
 
     <convert:Divide2Converter x:Key="Divide2Converter" />
     <convert:InverseDivide2Converter x:Key="InverseDivide2Converter" />
+    <convert:Bool2VisibilityConverter x:Key="Bool2VisibilityConverter" />
     <core:NodeTemplateSelector x:Key="NodeTemplate" />
 
     <DataTemplate x:Key="DefaultNodeElementHolder" DataType="{x:Type model:NodeElementGroup}">
@@ -32,6 +33,7 @@
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
                             ConnectorType="Input"
+                            Element="{Binding}"
                             NodeParent="{Binding RelativeSource={RelativeSource AncestorType=core:NodeContainer}}">
                             <core:NodeConnector.RenderTransform>
                                 <TranslateTransform X="{Binding ElementName=LeftConnector, Path=ActualWidth, Converter={StaticResource InverseDivide2Converter}}" />
@@ -42,7 +44,8 @@
                             Grid.Column="1"
                             Content="{Binding}"
                             ContentTemplateSelector="{Binding RelativeSource={RelativeSource AncestorType=core:NodeContainer}, Path=ElementSelector}"
-                            DataContext="{Binding}" />
+                            DataContext="{Binding}"
+                            Visibility="{Binding IsVisible, Converter={StaticResource Bool2VisibilityConverter}}" />
                         <core:NodeConnector
                             x:Name="RightConnector"
                             Grid.Column="2"
@@ -50,6 +53,7 @@
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center"
                             ConnectorType="Output"
+                            Element="{Binding}"
                             NodeParent="{Binding RelativeSource={RelativeSource AncestorType=core:NodeContainer}}">
                             <core:NodeConnector.RenderTransform>
                                 <TranslateTransform X="{Binding ElementName=RightConnector, Path=ActualWidth, Converter={StaticResource Divide2Converter}}" />

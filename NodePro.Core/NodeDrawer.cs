@@ -1,4 +1,5 @@
-﻿using NodePro.Abstractions;
+﻿using DryIoc.ImTools;
+using NodePro.Abstractions;
 using NodePro.Abstractions.Arguments;
 using NodePro.Abstractions.Constants;
 using NodePro.Abstractions.Enums;
@@ -6,24 +7,30 @@ using NodePro.Abstractions.Exceptions;
 using NodePro.Abstractions.Interfaces;
 using NodePro.Abstractions.Models;
 using NodePro.Core.Node;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace NodePro.Core
 {
-    
-
     public class NodeDrawer
     {
+        #region Fields
+
         private readonly IContainerProvider _containerProvider;
         private readonly NodeCreateService _creator;
         private readonly NodeLineCreator _lineCreator;
         private readonly NodeCanvas _canvas;
 
         private readonly List<LinePair> _linePairs = [];
-
         private string _lineMode = NodeLineConstants.Curve;
+
+        #endregion
+
+        #region Properties
+
+
         public string LineMode
         {
             get => _lineMode;
@@ -34,6 +41,11 @@ namespace NodePro.Core
                 OnLineModeChanged();
             }
         }
+
+        #endregion
+
+        #region Constructor
+
         public NodeDrawer(IContainerProvider containerProvider, NodeCanvas canvas)
         {
             _containerProvider = containerProvider;
@@ -42,6 +54,7 @@ namespace NodePro.Core
             _canvas = canvas;
             InitCanvas();
         }
+        #endregion
 
         #region Public Method
 
@@ -58,17 +71,12 @@ namespace NodePro.Core
             AddToCanvas(container);
         }
 
+
         public NodeLine DrawConnect(NodeConnectEventArgs args)
         {
             NodeLine line = _lineCreator.CreateLine(args);
             AddToCanvas(line);
             return line;
-        }
-
-        public void ExecuteFrom(NodeContainer node)
-        {
-            NodeData data = new NodeData();
-            
         }
 
         public void AddToCanvas(UIElement element)
@@ -86,20 +94,36 @@ namespace NodePro.Core
 
         #region Private Methods
 
-        private void CreateExecutionGroup()
-        {
-
-        }
         private void InitCanvas()
         {
             _canvas.NodeConnect += OnNodeConnect;
             _canvas.NodeConnectStart += OnNodeConnectStart;
             _canvas.MouseMove += OnMouseMove;
+            _canvas.PreviewMouseLeftButtonDown += OnPreviewMouseLeftButtonDown;
             _canvas.PreviewMouseLeftButtonUp += OnPreviewMouseLeftButtonUp;
-
+            _canvas.Drop += OnCanvasDrop;
             InitTrack();
         }
 
+        private void OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            INodeContainer[] containers = GetContainers();
+            containers.ForEach(x => x.IsSelected = false);
+        }
+
+        private void OnCanvasDrop(object sender, DragEventArgs e)
+        {
+            Debug.WriteLine("Canvas Dropped");
+            INodeConnector? connector= e.Data.GetData(typeof(INodeConnector)) as INodeConnector;
+            if (connector is null) return;
+        }
+
+        /// <summary>
+        /// 连线的核心方法，此处调用<see cref="DragDrop.DoDragDrop(DependencyObject, object, DragDropEffects)"/> 放下数据
+        /// 数据类型 <see cref="NodeData"/>
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (_tracking)
@@ -107,7 +131,13 @@ namespace NodePro.Core
                 EndTrack();
 
                 if (_connectStartArgs == null) return;
-                DragDrop.DoDragDrop(_canvas, _connectStartArgs.StartFrom.Connector, DragDropEffects.Move);
+                NodeData data = [];
+                NodeDropArgs args = new NodeDropArgs()
+                {
+                    StartFrom = _connectStartArgs.StartFrom.Connector,
+                };
+                data.Add(NodeConstants.ParamsDrop, args);
+                DragDrop.DoDragDrop(_canvas, data, DragDropEffects.Move);
             }
         }
 
@@ -154,9 +184,10 @@ namespace NodePro.Core
                 throw new NodeConnectException(ConnectionErrorCode.输入点多条连线);
             }
             LinePair pair = pairs.FirstOrDefault();
-            NodeConnectorBase start = pair.Source.Connector;
+            INodeConnector start = pair.Source.Connector;
+            pair.Target.Connector.OnConnectRelease();
             _linePairs.Remove(pair);
-            RemoveFromCanvas(pair.Line);
+            RemoveFromCanvas(pair.Line as Control);
             // 不能使用DoConnectFrom,因为这里调整了流向，args.StartFrom来自输入点，但start来自输出点，流向有问题，要重开一个NodeConnect事件
             start.OnConnectStart();
 
@@ -201,16 +232,18 @@ namespace NodePro.Core
 
         #endregion
 
-        private List<T> GetCanvasTypes<T>() where T :UIElement
+        private List<T> GetCanvasTypes<T>()
         {
             List<T> elements = [];
             foreach (var element in _canvas.Children) 
             {
-                if (element.GetType() != typeof(T)) continue;
-                elements.Add((T)element);
+                if (element is not T t) continue;
+                elements.Add(t);
             }
             return elements;
         }
+
+        private INodeContainer[] GetContainers() => GetCanvasTypes<INodeContainer>().ToArray();
 
         private void OnLineModeChanged()
         {

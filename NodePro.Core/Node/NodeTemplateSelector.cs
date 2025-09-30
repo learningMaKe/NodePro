@@ -1,4 +1,4 @@
-﻿using NodePro.Core.Model;
+﻿using NodePro.Abstractions.Models;
 using System.Windows;
 using System.Windows.Controls;
 

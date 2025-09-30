@@ -27,7 +27,7 @@ namespace NodePro.Sheet
         public string Test { get; set; } = "要放国庆节了，万岁！";
 
         [Output("Formateee"), NodeOrder(5)]
-        public string Demo { get; set; } = "阿西吧";
+        public string Demo { get; set; } = "愿国庆永不结束";
 
         public NodeData DataProcess(NodeData data)
         {

@@ -13,9 +13,13 @@
 
   <ItemGroup>
     <Compile Remove="bin\**" />
+    <Compile Remove="Config\**" />
     <EmbeddedResource Remove="bin\**" />
+    <EmbeddedResource Remove="Config\**" />
     <None Remove="bin\**" />
+    <None Remove="Config\**" />
     <Page Remove="bin\**" />
+    <Page Remove="Config\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,10 +33,6 @@
     <ProjectReference Include="..\NodePro.Services.Interfaces\NodePro.Services.Interfaces.csproj" />
     <ProjectReference Include="..\NodePro.Services\NodePro.Services.csproj" />
     <ProjectReference Include="..\NodePro.UI\NodePro.UI.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Config\" />
   </ItemGroup>
 
 </Project>

@@ -6,7 +6,7 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:NodePro.Modules.Display.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:model="clr-namespace:NodePro.Core.Model;assembly=NodePro.Core"
+    xmlns:model="clr-namespace:NodePro.Abstractions.Models;assembly=NodePro.Abstractions"
     xmlns:node="clr-namespace:NodePro.Core.Node;assembly=NodePro.Core"
     xmlns:prism="http://prismlibrary.com/"
     xmlns:viewmodels="clr-namespace:NodePro.Modules.Display.ViewModels"

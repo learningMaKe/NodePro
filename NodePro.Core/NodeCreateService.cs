@@ -3,7 +3,6 @@ using NodePro.Abstractions.Constants;
 using NodePro.Abstractions.Exceptions;
 using NodePro.Abstractions.Interfaces;
 using NodePro.Abstractions.Models;
-using NodePro.Core.Model;
 using NodePro.Core.Node;
 using Prism.Ioc;
 using System.Diagnostics;
@@ -97,7 +96,7 @@ namespace NodePro.Core
             NodeProperty[]? attributes = [];
             try
             {
-
+                // ToDo:优化这个逻辑
                 if (!_reflectionProperties.TryGetValue(nodeType, out attributes))
                 {
                     PropertyInfo[] props = nodeType.GetProperties(BindingFlags.Public | BindingFlags.Instance);

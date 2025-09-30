@@ -24,11 +24,12 @@ namespace NodePro.Abstractions.Attrs
         }
 
     }
-
+    
     public class InputAttribute : NodePropertyAttribute
     {
         public InputAttribute(string format, string template) : base(format, template,NodeMode.Input)
         {
+
         }
     }
 

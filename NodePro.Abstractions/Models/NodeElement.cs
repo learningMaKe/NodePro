@@ -7,8 +7,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
-namespace NodePro.Core.Model
+namespace NodePro.Abstractions.Models
 {
     public class NodeElementGroup : ObservableCollection<NodeElement>
     {
@@ -21,7 +22,7 @@ namespace NodePro.Core.Model
         {
             foreach(var element in elements) 
             {
-                this.Add(element); 
+                Add(element); 
             }
         }
 
@@ -91,6 +92,14 @@ namespace NodePro.Core.Model
             set { SetProperty(ref _order, value); }
         }
 
+        private bool _isVisible = true;
+
+        public bool IsVisible
+        {
+            get=>_isVisible; 
+            set => SetProperty(ref _isVisible, value);
+        }
+
         #endregion
 
         public Action<object?>? ContentChanged = null;
@@ -100,6 +109,21 @@ namespace NodePro.Core.Model
             if (Sheet is null) return;
             Prop.SetValue(Sheet, _content);
             ContentChanged?.Invoke(_content);
+        }
+
+        public void OnConnectDrop()
+        {
+            IsVisible = false;
+        }
+
+        public void OnConnectRelease()
+        {
+            IsVisible = true;
+        }
+
+        private void VisibleToggle()
+        {
+            IsVisible = !IsVisible;
         }
     }
 

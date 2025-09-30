@@ -36,9 +36,9 @@ namespace NodePro.Core
             Type[] types = register.GetRegisterTypes(NodeConstants.KeyNodes);
             foreach(var type in types)
             {
-                string category=type.Name;
+                string category = type.Name;
                 NodeCategoryAttribute? attribute = type.GetCustomAttribute<NodeCategoryAttribute>();
-                if (attribute != null)
+                if (attribute != null && !string.IsNullOrEmpty(attribute.Category))
                 {
                     category = attribute.Category;
                 }

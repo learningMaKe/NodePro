@@ -3,7 +3,6 @@ using NodePro.Abstractions.Arguments;
 using NodePro.Abstractions.Constants;
 using NodePro.Abstractions.Interfaces;
 using NodePro.Abstractions.Models;
-using NodePro.Core.Model;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -27,7 +26,7 @@ namespace NodePro.Core.Node
     public delegate void NodeConnectStartEventHandler(object sender, NodeConnectStartEventArgs args);
 
     [ContentProperty("Elements")]
-    public class NodeContainer:NodeContainerBase
+    public class NodeContainer:Expander,INodeContainer
     {
 
         #region Fields
@@ -92,7 +91,7 @@ namespace NodePro.Core.Node
 
 
 
-        public override Point Position
+        public Point Position
         {
             get { return (Point)GetValue(PositionProperty); }
             set { SetValue(PositionProperty, value); }
@@ -268,7 +267,7 @@ namespace NodePro.Core.Node
 
         #region Events
 
-        public override event PositionChangedEventHandler? PositionChangedEventHandler;
+        public event PositionChangedEventHandler? PositionChangedEventHandler;
 
         #endregion
 

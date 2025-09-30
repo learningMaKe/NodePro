@@ -1,7 +1,9 @@
 ﻿using NodePro.Abstractions;
 using NodePro.Abstractions.Arguments;
+using NodePro.Abstractions.Constants;
 using NodePro.Abstractions.Enums;
 using NodePro.Abstractions.Interfaces;
+using NodePro.Abstractions.Models;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -11,24 +13,32 @@ using System.Windows.Shapes;
 
 namespace NodePro.Core.Node
 {
-    public delegate void ConnectEventHandler(object sender, ConnectEventArgs e);
 
-    public delegate void ConnectStartEventHandler(object sender, ConnectStartEventArgs e);
-
-    public class NodeConnector : NodeConnectorBase
+    public class NodeConnector : Control, INodeConnector
     {
         #region Properties
 
-        private Point _position = new Point();
-        private bool _isDrag = false;
-        private GeneralTransform? _transform;
-
-
+        protected Point _dragPosition = new Point();
+        protected bool _isDrag = false;
+        protected GeneralTransform? _transform;
 
         #endregion
 
         #region Dependency Properties
-        public override ConnectorType ConnectorType
+
+
+        public Point Position
+        {
+            get
+            {
+                if (NodeParent is null) return new Point();
+                Point newPos = this.GetRealtivePosition();
+                Point parentPos = NodeParent.Position;
+                return new Point(parentPos.X + newPos.X + this.ActualWidth / 2, parentPos.Y + newPos.Y + this.ActualHeight / 2);
+            }
+        }
+
+        public ConnectorType ConnectorType
         {
             get { return (ConnectorType)GetValue(ConnectorTypeProperty); }
             set { SetValue(ConnectorTypeProperty, value); }
@@ -50,23 +60,40 @@ namespace NodePro.Core.Node
 
 
 
-        public override NodeContainerBase NodeParent
+        public INodeContainer NodeParent
         {
-            get { return (NodeContainerBase)GetValue(NodeParentProperty); }
+            get { return (INodeContainer)GetValue(NodeParentProperty); }
             set { SetValue(NodeParentProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for NodeParent.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty NodeParentProperty =
-            DependencyProperty.Register("NodeParent", typeof(NodeContainerBase), typeof(NodeConnector), new PropertyMetadata(null));
+            DependencyProperty.Register("NodeParent", typeof(INodeContainer), typeof(NodeConnector), new PropertyMetadata(null));
+
+
+
+        public NodeElement Element
+        {
+            get { return (NodeElement)GetValue(ElementProperty); }
+            set { SetValue(ElementProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for Element.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ElementProperty =
+            DependencyProperty.Register("Element", typeof(NodeElement), typeof(NodeConnector), new PropertyMetadata(null));
+
 
 
 
         #endregion
 
-        #region Routed Event
-
-        #region ConnectEvent
+        public NodeConnector()
+        {
+            this.Loaded += OnConnectorLoaded;
+            this.Drop += OnNodeDrop;
+            this.PreviewMouseLeftButtonDown += OnPreviewMouseLeftButtonDown;
+            this.PreviewMouseMove += OnPreviewMouseMove;
+        }
 
         // 注册路由事件：使用自定义的 ConnectEventHandler 委托类型
         public static readonly RoutedEvent ConnectEvent = EventManager.RegisterRoutedEvent(
@@ -84,17 +111,16 @@ namespace NodePro.Core.Node
         }
 
         // 触发事件的方法（内部调用，用于发布事件）
-        protected virtual void OnConnect(NodeConnector source, NodeConnector target)
+        public void OnConnect(INodeConnector source, INodeConnector target)
         {
             // 创建自定义事件参数，传递路由事件和数据
             var args = new ConnectEventArgs(ConnectEvent, source, target);
+
             // 触发事件（this 为事件源）
             RaiseEvent(args);
+            Element.OnConnectDrop();
         }
 
-        #endregion
-
-        #region Drop Event
 
         public static readonly RoutedEvent ConnectStartEvent = EventManager.RegisterRoutedEvent("ConnectStart", RoutingStrategy.Bubble, typeof(ConnectStartEventHandler), typeof(NodeConnector));
 
@@ -103,40 +129,41 @@ namespace NodePro.Core.Node
             add { AddHandler(ConnectStartEvent, value); }
             remove => RemoveHandler(ConnectStartEvent, value);
         }
-        
-        public override void OnConnectStart()
+
+        public void OnConnectStart()
         {
             var args = new ConnectStartEventArgs(ConnectStartEvent, this);
             RaiseEvent(args);
         }
 
-        #endregion
+        public event PositionChangedEventHandler? PositionChangedEventHandler;
 
-        #endregion
-
-        #region Constructor
-        public NodeConnector()
+        private void OnConnectorLoaded(object sender, RoutedEventArgs e)
         {
-            this.Loaded += OnConnectorLoaded;
-            this.Drop += OnNodeDrop;
-            this.PreviewMouseLeftButtonDown+= OnPreviewMouseLeftButtonDown;
-            this.PreviewMouseMove += OnPreviewMouseMove;
+            if (NodeParent is not INotifyPosition notifier) return;
+            notifier.PositionChangedEventHandler += OnNodePositionChangedEvent;
         }
+
+        private void OnNodePositionChangedEvent(object notifier, PositionChangedEventArgs args)
+        {
+            PositionChangedEventHandler?.Invoke(this, args);
+        }
+
 
         private void OnPreviewMouseMove(object sender, MouseEventArgs e)
         {
             if (e.LeftButton != MouseButtonState.Pressed) return;
-            if (!_isDrag) return; 
-            Point start = _position;
+            if (!_isDrag) return;
+            Point start = _dragPosition;
             Point current = e.GetPosition(null);
             double horizontalDiff = Math.Abs(current.X - start.X);
             double verticalDiff = Math.Abs(current.Y - start.Y);
 
             // 当水平或垂直距离超过系统默认阈值时，启动拖放
-            if (horizontalDiff > SystemParameters.MinimumHorizontalDragDistance ||
-                verticalDiff > SystemParameters.MinimumVerticalDragDistance)
+            if (horizontalDiff > SystemParameters.MinimumHorizontalDragDistance/2 ||
+                verticalDiff > SystemParameters.MinimumVerticalDragDistance/2)
             {
-                _position = current;
+                _dragPosition = current;
                 OnConnectStart();
                 _isDrag = false;
             }
@@ -144,7 +171,7 @@ namespace NodePro.Core.Node
 
         private void OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            _position = e.GetPosition(null);
+            _dragPosition = e.GetPosition(null);
             _isDrag = true;
         }
 
@@ -153,8 +180,9 @@ namespace NodePro.Core.Node
             if (e.Source is not DependencyObject obj) return;
 
             // 获取拖拽的源连接器
-            if (e.Data.GetData(typeof(NodeConnector)) is not NodeConnector source) return;
-
+            if (e.Data.GetData(typeof(NodeData)) is not NodeData data) return;
+            var source = data.GetValue<NodeDropArgs>(NodeConstants.ParamsDrop).StartFrom;
+            if (source is null) return;
             // 1. 检查源和目标是否属于同一个父节点（防止节点自连）
             if (source.NodeParent == NodeParent)
             {
@@ -163,8 +191,8 @@ namespace NodePro.Core.Node
             }
 
             // 2. 声明实际用于连接的源和目标
-            NodeConnector actualSource;
-            NodeConnector actualTarget;
+            INodeConnector actualSource;
+            INodeConnector actualTarget;
 
             // 3. 判断连接方向并处理
             if (source.ConnectorType == ConnectorType.Output && ConnectorType == ConnectorType.Input)
@@ -188,39 +216,26 @@ namespace NodePro.Core.Node
 
             // 4. 执行连接操作（确保始终是输出→输入，且不同节点）
             actualTarget.OnConnect(actualSource, actualTarget);
-        }
-
-        static NodeConnector()
-        {
+            e.Handled = true;
 
         }
 
-        #endregion
-        public override Point Position
+        public void OnConnectRelease()
         {
-            get
+            Element.OnConnectRelease();
+        }
+
+
+        public Point GetRealtivePosition()
+        {
+            if (NodeParent is Control obj)
             {
-                Point point = new Point();
-                if (NodeParent is null) return point;
-                _transform ??= this.TransformToAncestor(NodeParent);
-                Point newPos = _transform.Transform(point);
-                Point parentPos = NodeParent.Position;
-                return new Point(parentPos.X + newPos.X + this.ActualWidth / 2, parentPos.Y + newPos.Y + this.ActualHeight / 2);
+                _transform ??= this.TransformToAncestor(obj);
+                Point newPos = _transform.Transform(new Point());
+                return newPos;
             }
-            set => throw new InvalidOperationException();
-        }
-
-        public override event PositionChangedEventHandler? PositionChangedEventHandler;
-
-        private void OnConnectorLoaded(object sender, RoutedEventArgs e)
-        {
-            if (NodeParent is not INotifyPosition notifier) return;
-            notifier.PositionChangedEventHandler += OnNodePositionChangedEvent;
-        }
-
-        private void OnNodePositionChangedEvent(object notifier, PositionChangedEventArgs args)
-        {
-            PositionChangedEventHandler?.Invoke(this, args);
+            return new Point();
         }
     }
+
 }
