@@ -1,7 +1,6 @@
 ﻿using NodePro.Abstractions.Interfaces;
 using NodePro.Core;
-using NodePro.Core.Extensions;
-using NodePro.Core.Node;
+using NodePro.Core.Registers;
 using NodePro.Services;
 using NodePro.Services.Interfaces;
 using NodePro.ViewModels;
@@ -33,9 +32,11 @@ namespace NodePro
         {
             containerRegistry.RegisterSingleton<IContentDialogService, ContentDialogService>();
             containerRegistry.RegisterSingleton<INodeService, NodeService>();
-            NodeRegister register = NodeRegisters.DefaultRegister;
-            register.PrismIoc(containerRegistry);
-            containerRegistry.RegisterInstance<INodeRegister>(register);
+            PrismProvider provider = new(Container, containerRegistry);
+            NodeRegister nodeRegister = new NodeRegister(provider);
+            nodeRegister.Scan();
+            nodeRegister.Ioc();
+            containerRegistry.RegisterInstance(typeof(INodeRegister), nodeRegister);
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)

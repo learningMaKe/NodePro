@@ -10,9 +10,14 @@ namespace NodePro.Abstractions.Interfaces
 {
     public interface INodeRegister
     {
-        public NodeRegisteredData[] GetRegisteredData(NodeRegisterType nodeRegisterType);
         public NodeRegisteredData[] GetRegisteredData(string key);
         public Type[] GetRegisterTypes(string key);
-        public Type[] GetRegisterTypes(NodeRegisterType type);
+
+        public NodeRegisteredData[] GetRegisteredData();
+        public Type[] GetRegisterTypes();
+
+        public RegisterState Scan();
+
+        public void Ioc();
     }
 }

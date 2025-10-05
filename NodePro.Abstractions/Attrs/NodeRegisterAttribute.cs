@@ -13,10 +13,17 @@ namespace NodePro.Abstractions.Attrs
         // Tag 是用来对应 NodeRegisterKey的，想要添加额外属性应该在NodeRegisterKey上改
         public string Tag { get;set; }
 
+        /// <summary>
+        /// 对应的是添加到容器的处理器Tag
+        /// </summary>
+        public string HadnlerTag { get; set; }
 
-        public NodeRegisterAttribute(string tag)
+        
+
+        public NodeRegisterAttribute(string tag,string handlerTag)
         {
             Tag = tag;
+            HadnlerTag = handlerTag;
         }
 
         public virtual object? GetExtraData() 
@@ -24,10 +31,6 @@ namespace NodePro.Abstractions.Attrs
             return null;
         }
 
-        public virtual void OnRegister(IContainerRegistry containerRegistry)
-        {
-
-        }
 
 
     }

@@ -8,11 +8,10 @@ using System.Threading.Tasks;
 namespace NodePro.Abstractions.Attrs
 {
     [AttributeUsage(AttributeTargets.Class)]
-    [NodeRegisterFlag(NodeConstants.HandlerSingleton)]
     public class NodeServiceAttribute : NodeRegisterAttribute
     {
         public Type? From;
-        public NodeServiceAttribute(Type? from = null) : base(NodeConstants.KeyServices)
+        public NodeServiceAttribute(Type? from = null) : base(NodeConstants.KeyServices, NodeConstants.HandlerSingleton)
         {
             From = from;
         }

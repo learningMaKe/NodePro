@@ -148,6 +148,19 @@ namespace NodePro.Core
             return (NodeRegisterConfig?)serializer.Deserialize(reader);
         }
 
+        public static NodeRegisterConfig CombineConfig(params string[] paths)
+        {
+            return CombineConfig(paths.Select(LoadConfig).ToArray());
+        }
+
+        public static NodeRegisterConfig CombineConfig(params NodeRegisterConfig[] configs)
+        {
+            NodeRegisterConfig config = new()
+            {
+                DllGroup = configs.Select(x => x.DllGroup).SelectMany(x => x).ToList()
+            };
+            return config;
+        }
         #endregion
 
         public static bool IsValidAssembly(string path)

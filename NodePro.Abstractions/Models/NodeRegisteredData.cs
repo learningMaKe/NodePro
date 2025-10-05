@@ -13,6 +13,6 @@ namespace NodePro.Abstractions.Models
 
         public object? ExtraData { get; init; }
 
-        public INodeRegisterTypeHandler? Handler { get; init; }
+        public IRegisterBehavior? RegisterBehavior { get; init; }
     }
 }

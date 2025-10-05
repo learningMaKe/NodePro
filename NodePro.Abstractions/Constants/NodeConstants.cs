@@ -23,6 +23,11 @@ namespace NodePro.Abstractions.Constants
         public const string KeyNodes = "Nodes";
         public const string KeyLines = "Lines";
 
+        public const string KeyTypeCommon = "KeyTypeCommon";
+
+        public const string BehaviorScan = "BehaviorScan";
+        public const string BehaviorRegister = "BehaviorRegister";
+
         public const string HandlerSingleton = "HandlerSingleton";
         public const string HandlerInstance = "HandlerInstance";
 
