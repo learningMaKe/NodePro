@@ -33,6 +33,11 @@ namespace NodePro.Core.Node
 
         #endregion
 
+        #region Properties
+
+        public INodeSheet? Sheet { get; set; }
+
+        #endregion
         #region Constants
 
 
@@ -194,6 +199,23 @@ namespace NodePro.Core.Node
 
         #endregion
 
+        #region TransmitData Event
+
+        public static readonly RoutedEvent TransmitDataEvent = EventManager.RegisterRoutedEvent("TransmitData",RoutingStrategy.Bubble,typeof(RoutedEventHandler),typeof(NodeContainer));
+
+        public event RoutedEventHandler TransmitData
+        {
+            add { AddHandler(TransmitDataEvent, value); }
+            remove { AddHandler(TransmitDataEvent, value); }
+        }
+
+        public void OnTransmitData()
+        {
+            RoutedEventArgs args = new RoutedEventArgs(TransmitDataEvent);
+            RaiseEvent(args);
+        }
+        #endregion
+
         #region Node Connect Event
 
         public static readonly RoutedEvent NodeConnectEvent = EventManager.RegisterRoutedEvent("NodeConnect", RoutingStrategy.Bubble, typeof(NodeConnectEventHandler), typeof(NodeContainer));
@@ -286,9 +308,9 @@ namespace NodePro.Core.Node
 
         #endregion
 
-        public NodeData Execute(NodeData data)
+        public void Execute(NodeExecutionData data)
         {
-            return data;
+            Sheet?.DataProcess(data.SharedData);
         }
         private void ExecuteConnect(object sender, ConnectEventArgs e)
         {
@@ -328,7 +350,6 @@ namespace NodePro.Core.Node
             this.OnMove(args);
 
         }
-
 
     }
 }

@@ -87,6 +87,7 @@ namespace NodePro.Core.Node
 
         #endregion
 
+        #region Construcotr
         public NodeConnector()
         {
             this.Loaded += OnConnectorLoaded;
@@ -95,6 +96,9 @@ namespace NodePro.Core.Node
             this.PreviewMouseMove += OnPreviewMouseMove;
         }
 
+        #endregion
+
+        #region RoutedEvent
         // 注册路由事件：使用自定义的 ConnectEventHandler 委托类型
         public static readonly RoutedEvent ConnectEvent = EventManager.RegisterRoutedEvent(
             "Connect",                  // 事件名称
@@ -135,6 +139,8 @@ namespace NodePro.Core.Node
             var args = new ConnectStartEventArgs(ConnectStartEvent, this);
             RaiseEvent(args);
         }
+
+        #endregion
 
         public event PositionChangedEventHandler? PositionChangedEventHandler;
 
@@ -219,6 +225,7 @@ namespace NodePro.Core.Node
             e.Handled = true;
 
         }
+
 
         public void OnConnectRelease()
         {

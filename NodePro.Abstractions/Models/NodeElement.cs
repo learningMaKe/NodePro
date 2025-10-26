@@ -40,6 +40,14 @@ namespace NodePro.Abstractions.Models
 
             return new NodeElementGroup(sortedElements.ToArray());
         }
+
+        public void AsyncData()
+        {
+            foreach(var element in this)
+            {
+                element.AsyncData();
+            }
+        }
     }
 
     public class NodeElement:BindableBase
@@ -60,6 +68,11 @@ namespace NodePro.Abstractions.Models
                 SetProperty(ref _content, value);
                 OnContentChanged();
             }
+        }
+
+        public void AsyncData()
+        {
+
         }
 
         private string _template = NodeTemplateKey.DefaultNodeTemplate;

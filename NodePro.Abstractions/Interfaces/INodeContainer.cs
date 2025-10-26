@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NodePro.Abstractions.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,5 +11,8 @@ namespace NodePro.Abstractions.Interfaces
     public interface INodeContainer:INotifyPosition
     {
         public bool IsSelected { get; set; }
+
+        public void Execute(NodeExecutionData data);
+
     }
 }

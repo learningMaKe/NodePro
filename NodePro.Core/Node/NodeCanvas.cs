@@ -27,6 +27,13 @@ namespace NodePro.Core.Node
             remove { RemoveHandler(NodeConnectStartEvent, value); }
         }
 
+        public static readonly RoutedEvent TransmitDataEvent = NodeContainer.TransmitDataEvent.AddOwner(typeof(NodeCanvas));
+
+        public event RoutedEventHandler TransmitData
+        {
+            add { AddHandler(TransmitDataEvent, value); }
+            remove { RemoveHandler(TransmitDataEvent, value); }
+        }
         public NodeCanvas()
         {
             

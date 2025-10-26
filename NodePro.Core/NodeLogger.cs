@@ -21,11 +21,15 @@ namespace NodePro.Core
 
     internal struct OctLogStruct
     {
-        public DateTime Time;
-        public LogLevel Level;
-        public string Message;
-        public string Source;
-        public Exception exception;
+        public DateTime Time = DateTime.MinValue;
+        public LogLevel Level=LogLevel.Info;
+        public string Message = string.Empty;
+        public string Source = string.Empty;
+        public Exception? exception;
+
+        public OctLogStruct()
+        {
+        }
     }
 
     public class NodeLogger

@@ -37,6 +37,7 @@ namespace NodePro
             nodeRegister.Scan();
             nodeRegister.Ioc();
             containerRegistry.RegisterInstance(typeof(INodeRegister), nodeRegister);
+            containerRegistry.RegisterInstance(typeof(IProvider), provider);
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)

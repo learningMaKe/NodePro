@@ -26,7 +26,6 @@ namespace NodePro.Core
         private readonly ConcurrentDictionary<string, Func<IScanBehavior?>> _createScanBehaviors = [];
         private readonly ConcurrentDictionary<string, NodeRegisterParams> _registerParameters = [];
         private readonly ConcurrentDictionary<string, Func<IRegisterBehavior?>> _createRegisterBehaviors = [];
-        private readonly NodeBehaviorData _behaviorsData = [];
         public RegisterState State { get;private set; } = RegisterState.NotScanned;
 
         public Assembly[] DllGroup { get; set; } = [];

@@ -22,6 +22,7 @@ namespace NodePro.Abstractions.Constants
         public const string KeyServices = "Services";
         public const string KeyNodes = "Nodes";
         public const string KeyLines = "Lines";
+        public const string KeyFormat = "Format";
 
         public const string KeyTypeCommon = "KeyTypeCommon";
 
@@ -33,6 +34,7 @@ namespace NodePro.Abstractions.Constants
 
         public const string ParamsDrop = "ParamsDrop";
 
+        public const string FormatIntString = "FormatIntString";
 
     }
 }

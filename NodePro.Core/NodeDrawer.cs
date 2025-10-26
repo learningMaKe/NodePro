@@ -16,6 +16,7 @@ namespace NodePro.Core
 {
     public class NodeDrawer
     {
+
         #region Fields
 
         private readonly IContainerProvider _containerProvider;
@@ -102,7 +103,13 @@ namespace NodePro.Core
             _canvas.PreviewMouseLeftButtonDown += OnPreviewMouseLeftButtonDown;
             _canvas.PreviewMouseLeftButtonUp += OnPreviewMouseLeftButtonUp;
             _canvas.Drop += OnCanvasDrop;
+            _canvas.TransmitData += ExecuteTransmitData;
             InitTrack();
+        }
+
+        private void ExecuteTransmitData(object sender, RoutedEventArgs e)
+        {
+            if (sender is not NodeContainer nodeContainer) return;
         }
 
         private void OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

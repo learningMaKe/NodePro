@@ -86,6 +86,7 @@ namespace NodePro.Core
                 Position = args.Position,
                 Header = sheet.Title,
                 Elements = group,
+                Sheet = sheet,
             };
             return container;
 
